@@ -27,7 +27,11 @@ if (-not $Python) { $Python = (Get-Command python3 -ErrorAction SilentlyContinue
 
 $AllTargets = @('claude-code', 'opencode', 'agents', 'hermes', 'omp',
                 'cursor', 'windsurf', 'cline', 'aider', 'copilot', 'codex', 'gemini')
-if ($Target.Count -eq 1 -and $Target[0] -eq 'all') { $Target = $AllTargets }
+
+# Invoked from bash or cmd, a comma list arrives as ONE argument (`-Target a,b` becomes the
+# single string 'a,b'), so split and trim here too. Native PowerShell passes an array already.
+$Target = @($Target | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+if ($Target -contains 'all') { $Target = $AllTargets }
 
 if (-not (Test-Path $Skill)) { throw "SKILL.md not found next to this script; run it from the clone" }
 if ($Target.Count -eq 0) { Write-Error 'no -Target given. Valid targets: ' -ErrorAction Continue; $AllTargets; exit 2 }

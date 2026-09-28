@@ -222,7 +222,7 @@ pwsh scripts/install.ps1 -Target claude-code,cursor,copilot,codex,gemini,opencod
 | --- | --- |
 | Claude Code | `.claude/skills/antitextai/SKILL.md` (project) or `~/.claude/skills/antitextai/SKILL.md` (global) |
 | opencode | `.opencode/skills/antitextai/SKILL.md`, also reads `.claude/skills/` and `.agents/skills/` |
-| Codex CLI and other AGENTS.md readers | `AGENTS.md` in the repo root, `~/.codex/AGENTS.md` for global |
+| Codex CLI and other AGENTS.md readers | `AGENTS.md` (this repository ships one at its root), `~/.codex/AGENTS.md` for global |
 | GitHub Copilot | `.github/copilot-instructions.md`, path-scoped `.github/instructions/*.instructions.md` |
 | Cursor | `.cursor/rules/antitextai.mdc`, or `AGENTS.md` |
 | Windsurf | `.windsurf/rules/antitextai.md` |
@@ -318,6 +318,7 @@ fixtures) and let the rest fail the build.
 antitextai/            the package: cleaner, scanner, verifier, CLI (no dependencies)
 tests/                 66 unittest cases, runnable with unittest or pytest
 SKILL.md               the Agent Skills compatible skill: full ruleset and workflow
+AGENTS.md              the same rules in the form AGENTS.md readers expect
 docs/                  agent integration, architecture, and the AI signature manual
 integrations/          ready-to-copy rule files for ten tools
 examples/              a dirty fixture and the exact output of cleaning it

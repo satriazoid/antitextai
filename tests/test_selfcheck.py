@@ -20,6 +20,7 @@ CLEAN_FILES = [
     "antitextai/scan.py",
     "antitextai/verify.py",
     "antitextai/cli.py",
+    "AGENTS.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
     "integrations/README.md",
