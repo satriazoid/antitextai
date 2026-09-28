@@ -7,6 +7,7 @@ listed here must stay clean, so a stray zero-width space in the package or in th
 fails the suite instead of shipping.
 """
 import pathlib
+import re
 import unittest
 
 from antitextai.verify import verify_paths
@@ -44,6 +45,16 @@ class SelfCheckTest(unittest.TestCase):
         reports = verify_paths([str(ROOT / f) for f in CLEAN_FILES], allow_dashes=True)
         dirty = [f"{r['path']}: {r['detail']}" for r in reports if r["status"] == "dirty"]
         self.assertEqual(dirty, [], "AI tells leaked into files that must stay clean")
+
+    def test_package_never_uses_the_3_10_only_write_text_kwarg(self):
+        # Path.write_text(newline=...) arrived in Python 3.10; on 3.9 it is a TypeError, which
+        # is exactly how the first CI run failed on three operating systems at once.
+        pattern = re.compile(r"write_text\([^)]*newline=")
+        offenders = [p.name for p in sorted((ROOT / "antitextai").glob("*.py"))
+                     if pattern.search(p.read_text(encoding="utf-8"))]
+        offenders += [p.name for p in sorted((ROOT / "scripts").glob("*.py"))
+                      if pattern.search(p.read_text(encoding="utf-8"))]
+        self.assertEqual(offenders, [], "3.10-only Path.write_text kwarg leaked back in")
 
     def test_package_sources_have_no_non_ascii_beyond_documented_symbols(self):
         # The scanner classifies; this asserts nothing sneaked in unclassified.

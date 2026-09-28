@@ -6,7 +6,7 @@ banner separators, end-of-block markers, conversational frames, NBSP indentation
 One small Python package. No dependencies, no network, no API key.
 
 [![CI](https://github.com/satriazoid/antitextai/actions/workflows/ci.yml/badge.svg)](https://github.com/satriazoid/antitextai/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 It ships two things that stay in sync:
@@ -87,7 +87,8 @@ python -m venv .venv
 # .venv/bin/python -m pip install -e .          # Linux and macOS
 ```
 
-Requires Python 3.8 or newer. The package has no runtime dependencies.
+Requires Python 3.9 or newer (CI runs 3.9, 3.12, and 3.13 on Linux, macOS, and Windows). The
+package has no runtime dependencies.
 
 ## Quickstart
 
@@ -316,7 +317,7 @@ fixtures) and let the rest fail the build.
 
 ```text
 antitextai/            the package: cleaner, scanner, verifier, CLI (no dependencies)
-tests/                 66 unittest cases, runnable with unittest or pytest
+tests/                 67 unittest cases, runnable with unittest or pytest
 SKILL.md               the Agent Skills compatible skill: full ruleset and workflow
 AGENTS.md              the same rules in the form AGENTS.md readers expect
 docs/                  agent integration, architecture, and the AI signature manual
@@ -359,4 +360,4 @@ Nothing in the package needs an agent to run: the CLI and the library stand alon
 
 MIT. See [LICENSE](LICENSE).
 
-Built by [Akujejo](https://github.com/satriazoid), with Hermes Agent.
+Built by [satriazoid](https://github.com/satriazoid), with Hermes Agent.

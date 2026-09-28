@@ -7,9 +7,9 @@ name = "antitextai"
 version = "1.0.0"
 description = "Strip AI text and code tells: invisible Unicode, smart quotes, banner separators, end-of-block markers, conversational frames."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "Akujejo", email = "satrialfa77@gmail.com" }]
+authors = [{ name = "satriazoid", email = "satrialfa77@gmail.com" }]
 keywords = ["ai", "llm", "text-cleanup", "unicode", "linter", "de-ai", "agent-skills"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -17,7 +17,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

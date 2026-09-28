@@ -16,7 +16,7 @@ from typing import Optional, Sequence
 
 from . import __version__
 from . import cleaner as C
-from .files import DEFAULT_EXCLUDE_DIRS, DEFAULT_EXTENSIONS, read_text
+from .files import DEFAULT_EXCLUDE_DIRS, DEFAULT_EXTENSIONS, read_text, write_text
 from .scan import format_report as format_scan, scan_paths
 from .verify import format_report as format_verify, verify_paths
 
@@ -87,7 +87,7 @@ def _cmd_clean(args: argparse.Namespace) -> int:
         cleaned += 1
         if args.write:
             if out != text:
-                f.write_text(out, encoding="utf-8", newline="")
+                write_text(f, out)
                 changed += 1
                 if not args.quiet:
                     print(f"cleaned {f}", file=sys.stderr)

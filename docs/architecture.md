@@ -103,7 +103,7 @@ Each of these was reproduced, fixed, and locked behind a regression test:
 
 Three layers, and they check different things:
 
-1. **Unit and regression tests** (`tests/`, 59 cases): exact expected output for a mixed document,
+1. **Unit and regression tests** (`tests/`, 67 cases): exact expected output for a mixed document,
    content preservation for each frame, code-safety fixtures, line endings, frontmatter bytes,
    idempotence, CLI exit codes, scanner classification, and the documented example.
 2. **`assert_no_artifacts(text)`**: the cleaner's own rules applied to its output. Idempotence

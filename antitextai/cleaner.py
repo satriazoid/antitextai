@@ -163,39 +163,7 @@ def assert_no_artifacts(text: str) -> None:
             raise AssertionError(f"frontmatter carries U+{ch:04X}; repair by hand, not by rule")
 
 
-def _main(argv=None) -> int:
-    import argparse
-    import pathlib
-    import sys
+# The command line lives in cli.py (`python -m antitextai`). This module stays import-only,
+# so it can be vendored into another project as a single file.
 
-    ap = argparse.ArgumentParser(
-        description="Strip AI text/code tells. Prints cleaned text, or rewrites with --write.")
-    ap.add_argument("files", nargs="+", help="files to clean; '-' reads stdin")
-    ap.add_argument("--write", action="store_true", help="rewrite files in place")
-    ap.add_argument("--no-bom", action="store_true", help="keep a leading U+FEFF")
-    args = ap.parse_args(argv)
-
-    rc = 0
-    for name in args.files:
-        if name == "-":
-            src, path = sys.stdin.read(), None
-        else:
-            path = pathlib.Path(name)
-            src = path.read_text(encoding="utf-8")
-        out = clean(src, strip_bom=not args.no_bom)
-        if args.write and path is not None:
-            if out != src:
-                path.write_text(out, encoding="utf-8", newline="")
-                print(f"cleaned {path}", file=sys.stderr)
-        else:
-            sys.stdout.write(out)
-        try:
-            assert_no_artifacts(out)
-        except AssertionError as e:                        # a residual after a pass is a real bug
-            print(f"{name}: {e}", file=sys.stderr)
-            rc = 1
-    return rc
-
-
-if __name__ == "__main__":
-    raise SystemExit(_main())
+__all__ = ["clean", "assert_no_artifacts", "split_frontmatter", "setext_lines"]

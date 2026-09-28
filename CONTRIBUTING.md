@@ -6,12 +6,12 @@ repository passes its own check.
 ```bash
 git clone https://github.com/satriazoid/antitextai.git
 cd antitextai
-python -m unittest discover -s tests -t . -v          # 59 cases, no pytest needed
+python -m unittest discover -s tests -t . -v          # 67 cases, no pytest needed
 python -m antitextai scan antitextai tests --strict    # the tool applied to itself
 ```
 
 Nothing to install: the package sits at the repo root, so `python -m antitextai` runs it, and
-`python -m pytest` works too if you prefer it. Python 3.8+ is required and the package has no
+`python -m pytest` works too if you prefer it. Python 3.9+ is required and the package has no
 runtime dependencies, which is a rule rather than a preference.
 
 ## What a good change looks like

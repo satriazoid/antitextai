@@ -64,6 +64,17 @@ def read_text(path: pathlib.Path) -> Optional[str]:
         return None
 
 
+def write_text(path: pathlib.Path, text: str) -> None:
+    """Write UTF-8 with newline translation disabled.
+
+    pathlib's write_text gained the newline keyword only in Python 3.10, and without it Windows
+    turns every LF into CRLF, which would rewrite the line endings the cleaner promises to
+    preserve. Use this helper instead of pathlib's write_text inside the package.
+    """
+    with open(path, "w", encoding="utf-8", newline="") as handle:
+        handle.write(text)
+
+
 def is_wanted(path: pathlib.Path, extensions: Iterable[str] = DEFAULT_EXTENSIONS) -> bool:
     suffix = path.suffix.lower()
     if suffix in set(extensions):

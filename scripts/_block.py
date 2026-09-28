@@ -69,7 +69,10 @@ def main(argv=None) -> int:
         print(f"up to date {path}")
         return 1
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(merged, encoding="utf-8", newline="")
+    # open() rather than pathlib's write_text with a newline keyword: that keyword needs Python
+    # 3.10, and without it Windows would rewrite the line endings of the file being merged into.
+    with open(path, "w", encoding="utf-8", newline="") as handle:
+        handle.write(merged)
     print(f"{'updated' if existing else 'created'} {path}")
     return 0
 

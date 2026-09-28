@@ -23,7 +23,7 @@ First public release.
 - `scripts/install.sh` and `scripts/install.ps1`, including non-destructive block merging into
   shared instruction files.
 - `.pre-commit-hooks.yaml` with a rewriting hook and a verify-only hook.
-- 59 unittest cases runnable with `unittest` or `pytest`, covering frame stripping, content
+- 67 unittest cases runnable with `unittest` or `pytest`, covering frame stripping, content
   preservation, code safety, line endings, frontmatter bytes, setext headings, idempotence,
   scanner classification, and every CLI exit code.
 - CI on Linux, macOS, and Windows across Python 3.9 to 3.13, including a self-scan of the
@@ -33,5 +33,7 @@ First public release.
 
 - Em dash `U+2014` and en dash `U+2013` are reported, never replaced. A numeric range, a
   compound noun, and a clause break each require a different replacement.
+- Python 3.9 or newer. `Path.write_text`'s newline keyword is 3.10-only, so the package writes
+  through its own helper; the first CI run proved that the hard way on three platforms at once.
 - Conservative by construction: binary files, non-UTF-8 files, string literals that look like
   comments, YAML frontmatter, and setext headings are all protected by tests.

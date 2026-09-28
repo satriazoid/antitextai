@@ -39,7 +39,7 @@ dependencies beyond the Python standard library.
 
 ## Prerequisites
 
-- Python 3.8 or newer. No packages to install.
+- Python 3.9 or newer. No packages to install.
 - The tool, which is either this repository cloned locally (then `python -m antitextai`
   works from the repo root) or installed with
   `pipx install "git+https://github.com/satriazoid/antitextai"` (then `antitextai`).

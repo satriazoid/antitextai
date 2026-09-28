@@ -6,7 +6,7 @@ banner pemisah, penanda akhir blok, kalimat pembuka gaya obrolan, indentasi NBSP
 Satu paket Python kecil. Tanpa dependensi, tanpa jaringan, tanpa API key.
 
 [![CI](https://github.com/satriazoid/antitextai/actions/workflows/ci.yml/badge.svg)](https://github.com/satriazoid/antitextai/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 [English README](README.md)
@@ -87,7 +87,8 @@ python -m venv .venv
 # .venv/bin/python -m pip install -e .          # Linux dan macOS
 ```
 
-Butuh Python 3.8 atau lebih baru. Tanpa dependensi runtime.
+Butuh Python 3.9 atau lebih baru (CI menguji 3.9, 3.12, dan 3.13 di Linux, macOS, dan Windows).
+Tanpa dependensi runtime.
 
 ## Mulai cepat
 
@@ -224,7 +225,7 @@ repos:
 
 ```text
 antitextai/            paket: cleaner, scanner, verifier, CLI (tanpa dependensi)
-tests/                 59 kasus unittest, bisa dijalankan dengan unittest atau pytest
+tests/                 67 kasus unittest, bisa dijalankan dengan unittest atau pytest
 SKILL.md               skill standar Agent Skills: aturan lengkap dan alur kerjanya
 docs/                  integrasi agent, arsitektur, dan manual sidik jari AI
 integrations/          file aturan siap salin untuk sepuluh tool
@@ -253,4 +254,4 @@ dan mode kegagalan yang membentuk kode ini.
 
 MIT. Lihat [LICENSE](LICENSE).
 
-Dibuat oleh [Akujejo](https://github.com/satriazoid), bersama Hermes Agent.
+Dibuat oleh [satriazoid](https://github.com/satriazoid), bersama Hermes Agent.
