@@ -203,8 +203,10 @@ fails if the cleaner and this documented example ever drift apart.
 
 ## Use it from an agent
 
-Any agent that can run a shell command can use the CLI. Agents that read `SKILL.md` or
-`AGENTS.md` pick the rules up automatically, straight from the clone.
+Any agent that can run a shell command can use the CLI. Agents that read `SKILL.md` pick the
+rules up straight from the clone. For tools that read `AGENTS.md`, `GEMINI.md`, or a rules file
+instead, run the installer, which writes one (and merges it into an existing file rather than
+overwriting it).
 
 ```bash
 # Skill-aware agents: copy SKILL.md into the place your tool looks.
@@ -314,13 +316,13 @@ fixtures) and let the rest fail the build.
 
 ```text
 antitextai/            the package: cleaner, scanner, verifier, CLI (no dependencies)
-tests/                 57 unittest cases, runnable with unittest or pytest
+tests/                 66 unittest cases, runnable with unittest or pytest
 SKILL.md               the Agent Skills compatible skill: full ruleset and workflow
-AGENTS.md              short pointer for AGENTS.md-reading agents
 docs/                  agent integration, architecture, and the AI signature manual
 integrations/          ready-to-copy rule files for ten tools
 examples/              a dirty fixture and the exact output of cleaning it
-scripts/               install.sh and install.ps1
+scripts/               install.sh, install.ps1, and the block merger they share
+.github/workflows/     CI: tests on three platforms, a self-scan, and a package install
 ```
 
 ## Development
