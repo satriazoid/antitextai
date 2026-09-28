@@ -119,7 +119,9 @@ def clean(text: str, *, strip_bom: bool = True) -> str:
     masked = {}
     lines = body.split("\n")
     for i in setext_lines(body):
-        masked[token := f"\x00SETEXT{i}\x00"] = lines[i]
+        # Two statements, not a walrus in the subscript: that form is a SyntaxError before 3.10.
+        token = f"\x00SETEXT{i}\x00"
+        masked[token] = lines[i]
         lines[i] = token
     body = "\n".join(lines)
     # Frames first, so a stripped opener can expose another frame on the same line.
