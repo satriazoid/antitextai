@@ -1,0 +1,14 @@
+- id: antitextai
+  name: antitextai (strip AI tells)
+  description: Remove invisible Unicode, smart quotes, banner separators, and conversational frames.
+  entry: antitextai clean --write --quiet
+  language: python
+  types: [text]
+  pass_filenames: true
+- id: antitextai-verify
+  name: antitextai (verify only)
+  description: Fail when a file still carries AI tells, changing nothing.
+  entry: antitextai verify --strict --allow-dashes
+  language: python
+  types: [text]
+  pass_filenames: true

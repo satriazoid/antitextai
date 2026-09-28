@@ -1,0 +1,19 @@
+# Keep text files plain ASCII where the tool would otherwise report them, and keep line
+# endings stable across the three platforms CI runs on.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{md,markdown,yml,yaml,json}]
+indent_size = 2
+# Markdown uses two trailing spaces to force a line break, so it is exempt.
+trim_trailing_whitespace = false
+
+[*.{sh,ps1}]
+indent_size = 2

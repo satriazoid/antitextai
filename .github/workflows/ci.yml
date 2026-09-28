@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: tests (py${{ matrix.python-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -t . -v
+
+      # The files that quote tells as data are left out on purpose: SKILL.md is the spec,
+      # the READMEs carry the before/after example, docs/ai-signatures-manual.md catalogs the
+      # literal characters, antitextai/cleaner.py documents its own patterns, and tests/ is a
+      # regression suite full of inputs. tests/test_selfcheck.py runs the same check in-process.
+      - name: Verify the repository text
+        shell: bash
+        run: |
+          python -m antitextai verify \
+            antitextai/__init__.py antitextai/__main__.py antitextai/files.py antitextai/scan.py \
+            antitextai/verify.py antitextai/cli.py \
+            CONTRIBUTING.md CHANGELOG.md integrations pyproject.toml \
+            --strict --allow-dashes
+
+  package:
+    name: install and run the console script
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install from source
+        run: python -m pip install .
+      - name: Console script works
+        run: antitextai --version
+      - name: Scan the repository
+        run: antitextai scan . --exclude "examples/**" --exclude "docs/**"
+      - name: Verify the package sources
+        run: |
+          antitextai verify antitextai/__init__.py antitextai/__main__.py antitextai/files.py \
+            antitextai/scan.py antitextai/verify.py antitextai/cli.py --strict --allow-dashes
