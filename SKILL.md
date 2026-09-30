@@ -25,9 +25,52 @@ dependencies beyond the Python standard library.
 ## When to Use
 
 - A file, diff, or document still carries LLM fingerprints: invisible characters, curly
-  quotes, `# ====` banners, `# end function x`, `Certainly! Here is ...`, NBSP indentation.
+  quotes, `# ====` banners, `# end function x`, NBSP indentation.
 - Preparing LLM output for publication: commits, PRs, docs, datasets.
 - Wiring a cleanup step into CI or a pre-commit hook.
+- Checking CSS/HTML for AI-generated font-family declarations (non-standard fonts).
+- Detecting AI-style linguistic tells in prose (hedging, fluff openers, sign-offs, bold-keyword lists, emoji headings).
+
+## Font Detection
+
+The `scan-fonts` subcommand detects non-standard font-family declarations in CSS and HTML files.
+Only five Google-sourced sans-serif fonts are considered human-curated:
+
+1. **Roboto** - Font sans-serif modern dari Google, clean dan mudah dibaca, cocok untuk UI/web design.
+2. **Open Sans** - Font humanist sans-serif yang netral dan friendly, sangat versatile untuk berbagai keperluan.
+3. **Montserrat** - Font geometric sans-serif dengan karakter elegan, sering digunakan untuk heading dan branding.
+4. **Lato** - Font sans-serif semi-rounded yang hangat namun profesional, bagus untuk body text.
+5. **Poppins** - Font geometric sans-serif dengan bentuk bulat dan modern, populer untuk desain contemporary.
+
+If any other font is detected in `font-family` declarations or Google Fonts `<link>` tags,
+it is flagged as an AI tell and the scanner recommends one of the five allowed fonts.
+
+```bash
+python -m antitextai scan-fonts .                           # detect non-standard fonts
+python -m antitextai scan-fonts src --strict                # fail if any non-allowed font is found
+python -m antitextai scan-fonts . --json > fonts.json       # machine-readable report
+```
+
+## Style Detection
+
+The `scan-styles` subcommand detects AI-generated prose patterns in text files:
+
+| Rule | Pattern | Action |
+| --- | --- | --- |
+| `HEDGING` | generally, typically, often, usually, somewhat, fairly, rather, pretty, quite, more or less, in general, on the whole | remove hedge or replace with direct statement |
+| `TRANSITION` | furthermore, additionally, moreover, consequently, nevertheless, hence, thus, accordingly, meanwhile, subsequently, alternatively, specifically, notably, essentially, ultimately, therefore, similarly, however, although | consider removing or replacing with simpler link |
+| `AI_OPENER` | Certainly!, Sure thing!, Of course!, Great question!, Happy to help!, etc. | delete entire line; AI filler |
+| `AI_SIGNOFF` | Hope this helps!, Let me know if..., Feel free to ask..., Don't hesitate to reach out... | delete entire line; AI filler |
+| `MID_GESTURE` | It's important to note that..., Please note that..., Needless to say..., In fact, Indeed... | delete the gesture clause |
+| `BOLD_KEYWORD_LIST` | `- **Security:** value`, `* **Key:** value` | drop the bold keyword prefix, write as plain prose |
+| `EMOJI_HEADING` | `## 🚀 Overview`, `### ✅ Summary` | remove emoji from heading |
+| `FILLER_SECTION` | `## Overview`, `## Conclusion`, `## Summary` (empty sections) | delete empty filler section |
+
+```bash
+python -m antitextai scan-styles .                          # detect AI-style tells
+python -m antitextai scan-styles src --strict               # fail if any tell is found
+python -m antitextai scan-styles . --json > styles.json     # machine-readable report
+```
 
 ## When NOT to use
 
@@ -172,6 +215,12 @@ frame never leaves a lowercase sentence start. Multi-word openers (`sure thing`,
    translation on Windows will silently convert them; use `newline=""`.
 7. **Binary files are skipped by content, not by extension.** Any NUL byte or non-UTF-8 means
    hands off. Non-ASCII inside a binary is normal.
+8. **Font recommendations are heuristic.** The `scan-fonts` command suggests replacements based
+   on keyword overlap (e.g., "geometric" → Montserrat, "humanist" → Open Sans). Review the output
+   and adjust manually if the suggestion doesn't fit the context.
+9. **Style detection is additive only.** `scan-styles` reports finds but does not auto-fix.
+   Some patterns (like `HEDGING`, `TRANSITION`) are debatable — review before removing.
+10. **Emoji detection uses Unicode ranges.** Some uncommon emoji outside the scanned ranges may slip through.
 
 ## Verification
 

@@ -17,6 +17,8 @@ from typing import Optional, Sequence
 from . import __version__
 from . import cleaner as C
 from .files import DEFAULT_EXCLUDE_DIRS, DEFAULT_EXTENSIONS, read_text, write_text
+from .fonts import format_report as format_font_report, scan_paths as scan_font_paths
+from .styles import format_report as format_style_report, scan_paths as scan_style_paths
 from .scan import format_report as format_scan, scan_paths
 from .verify import format_report as format_verify, verify_paths
 
@@ -28,7 +30,11 @@ examples:
   antitextai clean - < draft.md           read stdin, write stdout
   antitextai verify . --strict            fail if any file is still dirty
 
-scan reports, clean rewrites, verify proves. Run all three in that order.
+    python -m antitextai scan-fonts .                       # detect non-standard fonts
+    python -m antitextai scan-fonts src --strict            # fail if any non-allowed font is found
+    python -m antitextai scan-fonts . --json > fonts.json   # machine-readable report
+
+scan reports AI tells; scan-fonts reports non-standard font-family declarations; clean rewrites; verify proves.
 """
 
 
@@ -156,7 +162,46 @@ def build_parser() -> argparse.ArgumentParser:
                           help="treat an unreviewed em/en dash as acceptable")
     p_verify.add_argument("--show-clean", action="store_true", help="list clean files too")
     p_verify.set_defaults(func=_cmd_verify)
+
+    p_fonts = sub.add_parser("scan-fonts", help="detect non-standard font-family declarations",
+                             description="Report font-family declarations that are not in the "
+                                         "allowed set (Roboto, Open Sans, Montserrat, Lato, Poppins).")
+    _common(p_fonts)
+    p_fonts.add_argument("--strict", action="store_true", help="exit 1 when any non-standard font is found")
+    p_fonts.set_defaults(func=_cmd_scan_fonts)
+
+    p_styles = sub.add_parser("scan-styles", help="detect AI-style linguistic tells in text",
+                              description="Report AI-generated prose patterns like hedging, fluff openers, "
+                                          "sign-offs, bold-keyword lists, emoji headings, and filler sections.")
+    _common(p_styles)
+    p_styles.add_argument("--strict", action="store_true", help="exit 1 when any AI-style tell is found")
+    p_styles.set_defaults(func=_cmd_scan_styles)
+
     return ap
+
+
+def _cmd_scan_fonts(args: argparse.Namespace) -> int:
+    reports = scan_font_paths(args.paths, **_kwargs(args))
+    if args.json:
+        print(json.dumps(reports, indent=2))
+    else:
+        print(format_font_report(reports))
+    flagged = [r for r in reports if r["count"] > 0]
+    if args.strict and flagged:
+        return 1
+    return 0
+
+
+def _cmd_scan_styles(args: argparse.Namespace) -> int:
+    reports = scan_style_paths(args.paths, **_kwargs(args))
+    if args.json:
+        print(json.dumps(reports, indent=2))
+    else:
+        print(format_style_report(reports))
+    flagged = [r for r in reports if r["count"] > 0]
+    if args.strict and flagged:
+        return 1
+    return 0
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
