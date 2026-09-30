@@ -15,6 +15,8 @@ CLI use:
     python -m antitextai verify .
 """
 from .cleaner import assert_no_artifacts, clean, setext_lines, split_frontmatter
+from .fonts import format_report as format_font_report, scan_paths as scan_font_paths
+from .styles import format_report as format_style_report, scan_paths as scan_style_paths
 from .scan import char_report, format_report, rule_report, scan_paths, scan_text
 from .verify import verify_paths, verify_text
 
@@ -32,5 +34,9 @@ __all__ = [
     "format_report",
     "verify_text",
     "verify_paths",
+    "scan_font_paths",
+    "format_font_report",
+    "scan_style_paths",
+    "format_style_report",
     "__version__",
 ]
