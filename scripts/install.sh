@@ -34,6 +34,7 @@ antitextai installer
   --target, -t LIST   comma-separated tools, or "all"
                       claude-code opencode agents hermes omp
                       cursor windsurf cline aider copilot codex gemini
+                      qwen-code crush kilo-code roo-code goose warp
   --dest,   -d DIR    project directory to install into (default: current directory)
   --global, -g        install into the user-level config for each tool
   --force,  -f        overwrite files that already exist and differ
@@ -56,7 +57,7 @@ done
 
 [ -f "$SKILL" ] || { echo "SKILL.md not found next to this script; run it from the clone" >&2; exit 2; }
 [ -n "$TARGETS" ] || { usage >&2; exit 2; }
-case "$TARGETS" in all) TARGETS="claude-code,opencode,agents,hermes,omp,cursor,windsurf,cline,aider,copilot,codex,gemini" ;; esac
+case "$TARGETS" in all) TARGETS="claude-code,opencode,agents,hermes,omp,cursor,windsurf,cline,aider,copilot,codex,gemini,qwen-code,crush,kilo-code,roo-code,goose,warp" ;; esac
 
 FAILED=0
 
@@ -101,6 +102,12 @@ home_skill_dir() {                  # global skills directory for tool $1
     agents)      echo "$HOME/.agents/skills/antitextai" ;;
     hermes)      echo "${HERMES_HOME:-$HOME/.hermes}/skills/antitextai" ;;
     omp)         echo "${OMP_HOME:-$HOME/.omp}/skills/antitextai" ;;
+    qwen-code)   echo "$HOME/.qwen/skills/antitextai" ;;
+    crush)       echo "$HOME/.config/crush/skills/antitextai" ;;
+    kilo-code)   echo "$HOME/.kilo/skills/antitextai" ;;
+    roo-code)    echo "$HOME/.roo/rules" ;;
+    goose)       echo "$HOME/.config/goose" ;;
+    warp)        echo "$HOME/.agents" ;;
   esac
 }
 
@@ -117,8 +124,14 @@ install_target() {                  # install_target TOOL
     cline)       copy_file "$REPO_DIR/integrations/cline/antitextai.md" "$DEST/.clinerules/antitextai.md" "Cline rule" ;;
     aider)       copy_file "$REPO_DIR/integrations/aider/CONVENTIONS.md" "$DEST/CONVENTIONS.md" "Aider conventions" ;;
     copilot)     copy_file "$INSTRUCTION" "$DEST/.github/copilot-instructions.md" "Copilot repository instructions" ;;
-    codex)       block_file "$INSTRUCTION" "$(if [ "$GLOBAL" = 1 ]; then echo "$HOME/.codex/AGENTS.md"; else echo "$DEST/AGENTS.md"; fi)" "antitextai" "AGENTS.md readers (Codex and others)" ;;
-    gemini)      block_file "$INSTRUCTION" "$(if [ "$GLOBAL" = 1 ]; then echo "$HOME/.gemini/GEMINI.md"; else echo "$DEST/GEMINI.md"; fi)" "antitextai" "Gemini CLI context" ;;
+    codex)       block_file "$REPO_DIR/integrations/codex/antitextai.md" "$(if [ "$GLOBAL" = 1 ]; then echo "$HOME/.codex/AGENTS.md"; else echo "$DEST/AGENTS.md"; fi)" "antitextai" "AGENTS.md readers (Codex and others)" ;;
+    gemini)      block_file "$REPO_DIR/integrations/gemini/antitextai.md" "$(if [ "$GLOBAL" = 1 ]; then echo "$HOME/.gemini/GEMINI.md"; else echo "$DEST/GEMINI.md"; fi)" "antitextai" "Gemini CLI context" ;;
+    qwen-code)   copy_file "$SKILL" "$(if [ "$GLOBAL" = 1 ]; then home_skill_dir qwen-code; else echo "$DEST/.qwen/skills/antitextai"; fi)/SKILL.md" "Qwen Code skill" ;;
+    crush)       copy_file "$SKILL" "$(if [ "$GLOBAL" = 1 ]; then home_skill_dir crush; else echo "$DEST/.crush/skills/antitextai"; fi)/SKILL.md" "Crush skill" ;;
+    kilo-code)   copy_file "$SKILL" "$(if [ "$GLOBAL" = 1 ]; then home_skill_dir kilo-code; else echo "$DEST/.kilo/skills/antitextai"; fi)/SKILL.md" "Kilo Code skill" ;;
+    roo-code)    copy_file "$REPO_DIR/integrations/roo-code/antitextai.md" "$(if [ "$GLOBAL" = 1 ]; then home_skill_dir roo-code; else echo "$DEST/.roo/rules"; fi)/antitextai.md" "Roo Code rule" ;;
+    goose)       copy_file "$REPO_DIR/integrations/goose/antitextai.md" "$(if [ "$GLOBAL" = 1 ]; then home_skill_dir goose; else echo "$DEST"; fi)/.goosehints" "goose hints" ;;
+    warp)        if [ "$GLOBAL" = 1 ]; then block_file "$REPO_DIR/integrations/warp/WARP.md" "$HOME/.agents/AGENTS.md" "antitextai" "Warp global rules"; else copy_file "$REPO_DIR/integrations/warp/WARP.md" "$DEST/WARP.md" "Warp project rules"; fi ;;
     *) echo "unknown target: $tool" >&2; FAILED=$((FAILED+1)); return 0 ;;
   esac
 }

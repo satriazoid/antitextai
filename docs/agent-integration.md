@@ -17,8 +17,8 @@ Then pick one of:
 
 ```bash
 # A. Let an installer copy SKILL.md where your tool looks.
-bash scripts/install.sh --target claude-code,opencode,cursor,copilot,codex,gemini,windsurf,cline,aider,hermes,omp
-pwsh scripts/install.ps1 -Target claude-code,opencode,cursor,copilot,codex,gemini,windsurf,cline,aider,hermes,omp
+bash scripts/install.sh --target all
+pwsh scripts/install.ps1 -Target all
 
 # B. Do it by hand for one tool. Claude Code, global:
 mkdir -p ~/.claude/skills/antitextai && cp SKILL.md ~/.claude/skills/antitextai/
@@ -54,6 +54,9 @@ the clone around (or `pipx install` the CLI and let the skill call `antitextai`)
 | Any reader of the `.agents` convention | `.agents/skills/antitextai/SKILL.md` | `~/.agents/skills/antitextai/SKILL.md` |
 | Hermes Agent | `./skills/antitextai/SKILL.md` | `~/.hermes/skills/antitextai/SKILL.md` (`%LOCALAPPDATA%\hermes\skills\` on Windows) |
 | omp (oh-my-pi) | `.omp/skills/antitextai/SKILL.md` | same under the omp config directory |
+| Qwen Code | `.qwen/skills/antitextai/SKILL.md` | `~/.qwen/skills/antitextai/SKILL.md` |
+| Crush | `.crush/skills/antitextai/SKILL.md` | `~/.config/crush/skills/antitextai/SKILL.md` |
+| Kilo Code | `.kilo/skills/antitextai/SKILL.md` | `~/.kilo/skills/antitextai/SKILL.md` |
 
 opencode additionally discovers `.claude/skills/` and `.agents/skills/`, so one copy can serve
 several tools. Claude Code merges custom commands into skills, which means `/antitextai` works as
@@ -74,7 +77,10 @@ other project the installer writes or merges the file for you.
 | Windsurf | `.windsurf/rules/antitextai.md` | Project rules directory. |
 | Cline | `.clinerules/antitextai.md` | Directory form, so it can grow later. |
 | Aider | `CONVENTIONS.md` | Reference it from `.aider.conf.yml` with `read: CONVENTIONS.md`. |
-| Gemini CLI | `GEMINI.md` | Project root. `~/.gemini/GEMINI.md` is the global equivalent. |
+| Gemini CLI | `GEMINI.md` | Project root. `~/.gemini/GEMINI.md` is the global equivalent. Gemini CLI also reads `.gemini/skills/` or `.agents/skills/`. |
+| Roo Code | `.roo/rules/antitextai.md` | Rules directory read recursively. Global equivalent: `~/.roo/rules/`. Roo Code also reads `AGENTS.md`. |
+| goose | `.goosehints` | Project root. Global equivalent: `~/.config/goose/.goosehints`. goose also reads `AGENTS.md` and `.agents/skills/`. |
+| Warp | `WARP.md` | Project root. Global equivalent: `~/.agents/AGENTS.md`. Warp also reads `AGENTS.md` and `.agents/skills/`. |
 
 Anything not on this list still works if it can run a shell command or read a file you point it
 at. The generic recipe:

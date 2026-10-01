@@ -26,7 +26,8 @@ $Python = (Get-Command python -ErrorAction SilentlyContinue).Source
 if (-not $Python) { $Python = (Get-Command python3 -ErrorAction SilentlyContinue).Source }
 
 $AllTargets = @('claude-code', 'opencode', 'agents', 'hermes', 'omp',
-                'cursor', 'windsurf', 'cline', 'aider', 'copilot', 'codex', 'gemini')
+                'cursor', 'windsurf', 'cline', 'aider', 'copilot', 'codex', 'gemini',
+                'qwen-code', 'crush', 'kilo-code', 'roo-code', 'goose', 'warp')
 
 # Invoked from bash or cmd, a comma list arrives as ONE argument (`-Target a,b` becomes the
 # single string 'a,b'), so split and trim here too. Native PowerShell passes an array already.
@@ -52,16 +53,16 @@ function Copy-Rule([string]$Src, [string]$Dst, [string]$Label) {
     Write-Host "wrote       $Dst   ($Label)"
 }
 
-function Merge-InstrFile([string]$Dst, [string]$Label) {
+function Merge-InstrFile([string]$Src, [string]$Dst, [string]$Label) {
     if (-not $Python) { Write-Warning "python not found; cannot merge into $Dst"; $script:Skipped++; return }
     if ($DryRun) {
         Write-Host "would merge the instruction block into $Dst"
-        & $Python $BlockScript --file $Dst --source $Instruction --marker antitextai --dry-run | ForEach-Object { "    | $_" }
+        & $Python $BlockScript --file $Dst --source $Src --marker antitextai --dry-run | ForEach-Object { "    | $_" }
         return
     }
     $dir = Split-Path -Parent $Dst
     if ($dir -and -not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
-    & $Python $BlockScript --file $Dst --source $Instruction --marker antitextai | Out-Null
+    & $Python $BlockScript --file $Dst --source $Src --marker antitextai | Out-Null
     if ($LASTEXITCODE -eq 0) { Write-Host "wrote       $Dst   ($Label)" }
     else { Write-Host "up to date  $Dst   ($Label)" }
 }
@@ -73,6 +74,12 @@ function Home-SkillDir([string]$Tool) {
         'agents'      { Join-Path $HOME '.agents/skills/antitextai' }
         'hermes'      { Join-Path $(if ($env:HERMES_HOME) { $env:HERMES_HOME } else { Join-Path $env:LOCALAPPDATA 'hermes' }) 'skills/antitextai' }
         'omp'         { Join-Path $(if ($env:OMP_HOME) { $env:OMP_HOME } else { Join-Path $HOME '.omp' }) 'skills/antitextai' }
+        'qwen-code'   { Join-Path $HOME '.qwen/skills/antitextai' }
+        'crush'       { Join-Path $HOME '.config/crush/skills/antitextai' }
+        'kilo-code'   { Join-Path $HOME '.kilo/skills/antitextai' }
+        'roo-code'    { Join-Path $HOME '.roo/rules' }
+        'goose'       { Join-Path $HOME '.config/goose' }
+        'warp'        { Join-Path $HOME '.agents' }
     }
 }
 
@@ -88,8 +95,14 @@ foreach ($t in $Target) {
         'cline'       { Copy-Rule (Join-Path $RepoDir 'integrations/cline/antitextai.md') (Join-Path $Dest '.clinerules/antitextai.md') 'Cline rule' }
         'aider'       { Copy-Rule (Join-Path $RepoDir 'integrations/aider/CONVENTIONS.md') (Join-Path $Dest 'CONVENTIONS.md') 'Aider conventions' }
         'copilot'     { Copy-Rule $Instruction (Join-Path $Dest '.github/copilot-instructions.md') 'Copilot repository instructions' }
-        'codex'       { $f = if ($Global) { Join-Path $HOME '.codex/AGENTS.md' } else { Join-Path $Dest 'AGENTS.md' }; Merge-InstrFile $f 'AGENTS.md readers (Codex and others)' }
-        'gemini'      { $f = if ($Global) { Join-Path $HOME '.gemini/GEMINI.md' } else { Join-Path $Dest 'GEMINI.md' }; Merge-InstrFile $f 'Gemini CLI context' }
+        'codex'       { $f = if ($Global) { Join-Path $HOME '.codex/AGENTS.md' } else { Join-Path $Dest 'AGENTS.md' }; Merge-InstrFile (Join-Path $RepoDir 'integrations/codex/antitextai.md') $f 'AGENTS.md readers (Codex and others)' }
+        'gemini'      { $f = if ($Global) { Join-Path $HOME '.gemini/GEMINI.md' } else { Join-Path $Dest 'GEMINI.md' }; Merge-InstrFile (Join-Path $RepoDir 'integrations/gemini/antitextai.md') $f 'Gemini CLI context' }
+        'qwen-code'   { $base = if ($Global) { Home-SkillDir 'qwen-code' } else { Join-Path $Dest '.qwen/skills/antitextai' }; Copy-Rule $Skill (Join-Path $base 'SKILL.md') 'Qwen Code skill' }
+        'crush'       { $base = if ($Global) { Home-SkillDir 'crush' } else { Join-Path $Dest '.crush/skills/antitextai' }; Copy-Rule $Skill (Join-Path $base 'SKILL.md') 'Crush skill' }
+        'kilo-code'   { $base = if ($Global) { Home-SkillDir 'kilo-code' } else { Join-Path $Dest '.kilo/skills/antitextai' }; Copy-Rule $Skill (Join-Path $base 'SKILL.md') 'Kilo Code skill' }
+        'roo-code'    { $base = if ($Global) { Home-SkillDir 'roo-code' } else { Join-Path $Dest '.roo/rules' }; Copy-Rule (Join-Path $RepoDir 'integrations/roo-code/antitextai.md') (Join-Path $base 'antitextai.md') 'Roo Code rule' }
+        'goose'       { $base = if ($Global) { Home-SkillDir 'goose' } else { $Dest }; Copy-Rule (Join-Path $RepoDir 'integrations/goose/antitextai.md') (Join-Path $base '.goosehints') 'goose hints' }
+        'warp'        { if ($Global) { Merge-InstrFile (Join-Path $RepoDir 'integrations/warp/WARP.md') (Join-Path (Home-SkillDir 'warp') 'AGENTS.md') 'Warp global rules' } else { Copy-Rule (Join-Path $RepoDir 'integrations/warp/WARP.md') (Join-Path $Dest 'WARP.md') 'Warp project rules' } }
         default       { Write-Warning "unknown target: $t"; $script:Skipped++ }
     }
 }
