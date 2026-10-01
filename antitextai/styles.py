@@ -1,7 +1,7 @@
 """AI-style prose detection: hedging, fluff openers, sign-offs, bold-keyword lists.
 
-These are not invisible characters — they are linguistic tells that LLMs
-produce at high frequency and humans rarely repeat in the same density.
+These are not invisible characters. They are linguistic tells that LLMs
+produce at high frequency, and humans rarely repeat them in the same density.
 Finding them in bulk is a strong signal of machine authorship.
 """
 from __future__ import annotations
@@ -10,9 +10,7 @@ import re
 from dataclasses import dataclass
 from typing import Iterable, Optional
 
-# ---------------------------------------------------------------------------
 # Rules
-# ---------------------------------------------------------------------------
 
 # Hedging words that dilute authority.
 HEDGING = re.compile(
@@ -42,7 +40,7 @@ AI_SIGNOFF = re.compile(
     r"|reach out if you have questions|happy to help with anything else)[,.!]?[ \t]*$",
 )
 
-# Mid-paragraph AI gestures — matches the gesture phrase and trailing content.
+# Mid-paragraph AI gestures: matches the gesture phrase and trailing content.
 # Key insight: "it's important to note that" may NOT be followed by punctuation
 # (e.g., "It's important to note that TTLs prevent stale data.")
 MID_GESTURE = re.compile(
@@ -86,9 +84,7 @@ class StyleFinding:
         }
 
 
-# ---------------------------------------------------------------------------
 # Public API
-# ---------------------------------------------------------------------------
 
 def scan_text(path: str, text: str) -> list[StyleFinding]:
     """Scan a file for AI-style linguistic tells."""

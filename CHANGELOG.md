@@ -3,6 +3,24 @@
 All notable changes to this project. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Agent integrations for Qwen Code, Crush, Kilo Code, Roo Code, goose, and Warp, bringing
+  the supported tools to eighteen, with per-tool files under `integrations/`.
+- `scripts/install.sh` and `scripts/install.ps1` now accept `--target all` / `-Target all`
+  to install the skill into every supported CLI in one run, plus `--dry-run` previews.
+- `integrations/README.md` and `docs/agent-integration.md` document the project and global
+  paths for all eighteen tools.
+
+### Fixed
+
+- `README.md` / `README.id.md` CLI reference now lists the `scan-fonts` and `scan-styles`
+  subcommands; tool count corrected from ten to eighteen.
+- `SKILL.md` workflow step numbering (1, 2, 3) and an architecture example that tripped
+  the project's own `END_TRAIL` rule.
+
 ## [1.0.0] - 2026-09-28
 
 First public release.
@@ -23,7 +41,7 @@ First public release.
 - `scripts/install.sh` and `scripts/install.ps1`, including non-destructive block merging into
   shared instruction files.
 - `.pre-commit-hooks.yaml` with a rewriting hook and a verify-only hook.
-- 67 unittest cases runnable with `unittest` or `pytest`, covering frame stripping, content
+- 111 unittest cases runnable with `unittest` or `pytest`, covering frame stripping, content
   preservation, code safety, line endings, frontmatter bytes, setext headings, idempotence,
   scanner classification, and every CLI exit code.
 - CI on Linux, macOS, and Windows across Python 3.9 to 3.13, including a self-scan of the

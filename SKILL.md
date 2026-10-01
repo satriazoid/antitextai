@@ -94,7 +94,7 @@ Run these through `terminal`. Order matters: inventory, transform, prove.
 ```bash
 python -m antitextai scan .                        # 1. what is in there, change nothing
 python -m antitextai clean --write PATH...         # 2. rewrite the deterministic half
-python -m antitextai verify PATH... --strict       # 4. prove it, exit 1 when still dirty
+python -m antitextai verify PATH... --strict       # 3. prove it, exit 1 when still dirty
 ```
 
 - `scan` reports every non-ASCII codepoint with count and first line:column, classified as
