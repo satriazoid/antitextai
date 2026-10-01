@@ -11,7 +11,9 @@ antitextai/
   scan.py      inventory: per-codepoint classification, rule hits, line numbers
   verify.py    the proof pass, built on cleaner.assert_no_artifacts
   files.py     file discovery, binary and non-UTF-8 rejection
-  cli.py       scan | clean | verify
+  fonts.py     scan-fonts: font-family declarations that read as AI typography
+  styles.py    scan-styles: linguistic tells, report-only
+  cli.py       scan | clean | verify | scan-fonts | scan-styles
 ```
 
 `cleaner.py` has no dependency on the others, so it can be vendored into another project as a
@@ -64,8 +66,8 @@ or after whitespace. That single anchoring is what keeps `x = "# end of loop"`,
 `url = 'http://x--y/z'` and `"-" * 8` intact. Regex cannot parse strings, so the scan treats any
 file with comment-looking literals as a manual-review candidate.
 
-**Trailing end markers need a lookbehind.** `return 1  # end function f` is not at line start, so
-a `^`-anchored rule misses it; deleting the whole line would destroy the code. `END_TRAIL` uses
+**Trailing end markers need a lookbehind.** `return 1  # end` is not at line start, so a
+`^`-anchored rule misses it; deleting the whole line would destroy the code. `END_TRAIL` uses
 `(?<=\S)` so it removes only the comment and never consumes the code's last character.
 
 **Setext headings must be masked twice.** A run of `=` or `-` alone on a line is either a banner
@@ -103,7 +105,7 @@ Each of these was reproduced, fixed, and locked behind a regression test:
 
 Three layers, and they check different things:
 
-1. **Unit and regression tests** (`tests/`, 67 cases): exact expected output for a mixed document,
+1. **Unit and regression tests** (`tests/`, 111 cases): exact expected output for a mixed document,
    content preservation for each frame, code-safety fixtures, line endings, frontmatter bytes,
    idempotence, CLI exit codes, scanner classification, and the documented example.
 2. **`assert_no_artifacts(text)`**: the cleaner's own rules applied to its output. Idempotence

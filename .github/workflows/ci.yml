@@ -33,7 +33,7 @@ jobs:
         run: |
           python -m antitextai verify \
             antitextai/__init__.py antitextai/__main__.py antitextai/files.py antitextai/scan.py \
-            antitextai/verify.py antitextai/cli.py \
+            antitextai/verify.py antitextai/cli.py antitextai/fonts.py antitextai/styles.py \
             CONTRIBUTING.md CHANGELOG.md integrations pyproject.toml \
             --strict --allow-dashes
 
@@ -54,4 +54,5 @@ jobs:
       - name: Verify the package sources
         run: |
           antitextai verify antitextai/__init__.py antitextai/__main__.py antitextai/files.py \
-            antitextai/scan.py antitextai/verify.py antitextai/cli.py --strict --allow-dashes
+            antitextai/scan.py antitextai/verify.py antitextai/cli.py antitextai/fonts.py \
+            antitextai/styles.py --strict --allow-dashes

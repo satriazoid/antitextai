@@ -16,7 +16,7 @@ Repositori ini berisi dua hal yang selalu dijaga sinkron:
 | Bagian | Isinya |
 | --- | --- |
 | `antitextai/` | Paket Python dan CLI yang menjalankan bagian mekanis dari aturan |
-| `SKILL.md` | Skill sesuai standar [Agent Skills](https://agentskills.io), sehingga Claude Code, opencode, Cursor, Copilot, Codex, Windsurf, Cline, Aider, Hermes, omp dan lainnya tahu cara memakainya, termasuk keputusan yang tidak bisa diambil regex |
+| `SKILL.md` | Skill sesuai standar [Agent Skills](https://agentskills.io), sehingga Claude Code, opencode, Cursor, Copilot, Codex, Windsurf, Cline, Aider, Hermes, omp, Qwen Code, Crush, Kilo Code, Roo Code, goose, Warp dan lainnya tahu cara memakainya, termasuk keputusan yang tidak bisa diambil regex |
 
 ## Kenapa ada
 
@@ -128,9 +128,9 @@ atau `AGENTS.md` langsung mengerti aturannya, cukup dari hasil clone.
 mkdir -p ~/.claude/skills/antitextai && cp SKILL.md ~/.claude/skills/antitextai/   # Claude Code
 mkdir -p .opencode/skills/antitextai && cp SKILL.md .opencode/skills/antitextai/   # opencode (proyek)
 
-# Atau pakai installer, yang sudah tahu path sepuluh tool:
-bash scripts/install.sh --target claude-code,opencode,cursor,copilot,codex,gemini,hermes
-pwsh scripts/install.ps1 -Target claude-code,opencode,cursor,copilot,codex,gemini,hermes
+# Atau pakai installer, yang sudah tahu path delapan belas tool:
+bash scripts/install.sh --target all
+pwsh scripts/install.ps1 -Target all
 ```
 
 | Tool | Letak skill atau aturannya |
@@ -146,6 +146,13 @@ pwsh scripts/install.ps1 -Target claude-code,opencode,cursor,copilot,codex,gemin
 | Gemini CLI | `GEMINI.md` di akar proyek, atau `~/.gemini/GEMINI.md` |
 | Hermes Agent | `~/.hermes/skills/antitextai/SKILL.md`, di Windows `%LOCALAPPDATA%\hermes\skills\` |
 | omp (oh-my-pi) | `.omp/skills/antitextai/SKILL.md` di proyek |
+| Pembaca konvensi `.agents` | `.agents/skills/antitextai/SKILL.md` atau `~/.agents/skills/antitextai/SKILL.md` |
+| Qwen Code | `.qwen/skills/antitextai/SKILL.md` atau `~/.qwen/skills/antitextai/SKILL.md` |
+| Crush | `.crush/skills/antitextai/SKILL.md` atau `~/.config/crush/skills/antitextai/SKILL.md` |
+| Kilo Code | `.kilo/skills/antitextai/SKILL.md` atau `~/.kilo/skills/antitextai/SKILL.md` |
+| Roo Code | `.roo/rules/antitextai.md`, atau `~/.roo/rules/antitextai.md` |
+| goose | `.goosehints`, atau `~/.config/goose/.goosehints` |
+| Warp | `WARP.md`, atau `~/.agents/AGENTS.md` |
 
 File siap salin untuk semua tool di atas ada di folder [`integrations/`](integrations), dan
 [`docs/agent-integration.md`](docs/agent-integration.md) menjelaskan pemasangan plus prompt agar
@@ -176,6 +183,8 @@ assert_no_artifacts(bersih)             # melempar AssertionError berisi sisa, a
 antitextai scan   PATH... [--strict] [--json] [--ext .md] [--exclude GLOB]
 antitextai clean  PATH... [--write] [--no-bom] [--quiet]
 antitextai verify PATH... [--strict] [--allow-dashes] [--show-clean]
+antitextai scan-fonts  PATH... [--strict] [--json]    # deklarasi font-family tak baku
+antitextai scan-styles PATH... [--strict] [--json]    # pola gaya prosa buatan AI
 ```
 
 - `PATH` boleh file atau direktori. `-` membaca stdin dan menulis stdout (khusus `clean`).
@@ -225,10 +234,10 @@ repos:
 
 ```text
 antitextai/            paket: cleaner, scanner, verifier, CLI (tanpa dependensi)
-tests/                 67 kasus unittest, bisa dijalankan dengan unittest atau pytest
+tests/                 111 kasus unittest, bisa dijalankan dengan unittest atau pytest
 SKILL.md               skill standar Agent Skills: aturan lengkap dan alur kerjanya
 docs/                  integrasi agent, arsitektur, dan manual sidik jari AI
-integrations/          file aturan siap salin untuk sepuluh tool
+integrations/          file aturan siap salin untuk delapan belas tool
 examples/              fixture kotor dan hasil bersihnya, byte per byte
 scripts/               install.sh dan install.ps1
 ```

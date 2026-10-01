@@ -6,7 +6,7 @@ repository passes its own check.
 ```bash
 git clone https://github.com/satriazoid/antitextai.git
 cd antitextai
-python -m unittest discover -s tests -t . -v          # 67 cases, no pytest needed
+python -m unittest discover -s tests -t . -v          # 111 cases, no pytest needed
 python -m antitextai scan antitextai tests --strict    # the tool applied to itself
 ```
 

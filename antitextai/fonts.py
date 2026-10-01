@@ -1,18 +1,18 @@
 """Font-family detection: flag non-standard fonts as AI tells.
 
-Only five Google-sourced sans-serif fonts are considered human-curated:
-  Roboto, Open Sans, Montserrat, Lato, Poppins
-
-Any other font-family declaration found in CSS, HTML inline styles,
-or Google Fonts <link> tags is reported as an AI-generated typography
-choice and the scanner suggests one of the five allowed replacements.
+Two groups are allowed. The curated Google sans-serifs that read as deliberately
+chosen, and the system stack that ships with an operating system, which is what
+this project itself recommends as the fix for a decorative web font. Anything
+else, Inter or Space Grotesk in a stylesheet, a decorative face in a Google
+Fonts <link>, is reported with a suggested replacement.
 """
 from __future__ import annotations
 
 import re
 from typing import Iterable, Optional
 
-ALLOWED = frozenset({
+# Curated Google sans-serifs.
+GOOGLE_FONTS = frozenset({
     "roboto",
     "open sans",
     "montserrat",
@@ -20,23 +20,35 @@ ALLOWED = frozenset({
     "poppins",
 })
 
-# ---------------------------------------------------------------------------
-# Patterns
-# ---------------------------------------------------------------------------
+# Fonts that ship with Windows, macOS, and common Linux desktops. A stylesheet
+# naming one of these is using what the reader already has, which is the
+# replacement this tool recommends, so it must not be reported as a tell.
+SYSTEM_FONTS = frozenset({
+    "arial", "helvetica", "verdana", "tahoma", "trebuchet ms", "segoe ui",
+    "calibri", "cambria", "georgia", "times new roman", "courier new",
+    "consolas", "menlo", "monaco", "-apple-system", "blinkmacsystemfont",
+    "ubuntu", "cantarell", "dejavu sans", "liberation sans",
+})
 
-# CSS font-family declarations — captures the full value after the colon.
+ALLOWED = GOOGLE_FONTS | SYSTEM_FONTS
+
+# Patterns
+
+# CSS font-family declarations, capturing the full value after the colon.
+# A missing trailing semicolon is tolerated, because the last declaration in a
+# block may omit it.
 _CSS_FONT_FAMILY = re.compile(
     r"font-family\s*:\s*([^;{}]+);",
     re.IGNORECASE,
 )
 
-# Google Fonts <link> tags — extracts the family name(s) from the URL.
+# Google Fonts <link> tags, extracting the family name(s) from the URL.
 _GFONT_LINK = re.compile(
     r'<link[^>]+href=["\']([^"\']*(?:fonts\.googleapis\.com)[^"\']*)["\'][^>]*>',
     re.IGNORECASE,
 )
 
-# Inline style font-family — works inside style="..." attributes.
+# Inline style font-family, working inside style="..." attributes.
 _INLINE_FONT_FAMILY = re.compile(
     r'''style\s*=\s*["\']([^"\']*font-family\s*:\s*[^;"]+)["\']''',
     re.IGNORECASE,
@@ -86,9 +98,7 @@ def _recommend(family: str) -> str:
     return best
 
 
-# ---------------------------------------------------------------------------
 # Public API
-# ---------------------------------------------------------------------------
 
 class FontFinding:
     """One non-standard font-family occurrence."""

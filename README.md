@@ -14,7 +14,7 @@ It ships two things that stay in sync:
 | Piece | What it is |
 | --- | --- |
 | `antitextai/` | An installable Python package and CLI that applies the deterministic half of the rules |
-| `SKILL.md` | An [Agent Skills](https://agentskills.io) compatible skill so Claude Code, opencode, Cursor, Copilot, Codex, Windsurf, Cline, Aider, Hermes, omp and friends know how to use it, including the judgment calls a regex cannot make |
+| `SKILL.md` | An [Agent Skills](https://agentskills.io) compatible skill so Claude Code, opencode, Cursor, Copilot, Codex, Windsurf, Cline, Aider, Hermes, omp, Qwen Code, Crush, Kilo Code, Roo Code, goose, Warp and friends know how to use it, including the judgment calls a regex cannot make |
 
 ## Why this exists
 
@@ -214,9 +214,9 @@ overwriting it).
 cp -r SKILL.md antitextai/ ~/.claude/skills/antitextai/     # Claude Code (global)
 mkdir -p .opencode/skills/antitextai && cp -r SKILL.md .opencode/skills/antitextai/   # opencode (project)
 
-# Or run the installer, which knows the paths for ten tools:
-bash scripts/install.sh --target claude-code,cursor,copilot,codex,gemini,opencode,hermes
-pwsh scripts/install.ps1 -Target claude-code,cursor,copilot,codex,gemini,opencode,hermes
+# Or run the installer, which knows the paths for eighteen tools:
+bash scripts/install.sh --target all
+pwsh scripts/install.ps1 -Target all
 ```
 
 | Tool | Where the skill or rules go |
@@ -232,6 +232,13 @@ pwsh scripts/install.ps1 -Target claude-code,cursor,copilot,codex,gemini,opencod
 | Gemini CLI | `GEMINI.md` in the project root, or `~/.gemini/GEMINI.md` |
 | Hermes Agent | `~/.hermes/skills/antitextai/SKILL.md`, on Windows `%LOCALAPPDATA%\hermes\skills\` |
 | omp (oh-my-pi) | `.omp/skills/antitextai/SKILL.md` in the project |
+| `.agents` convention readers | `.agents/skills/antitextai/SKILL.md` or `~/.agents/skills/antitextai/SKILL.md` |
+| Qwen Code | `.qwen/skills/antitextai/SKILL.md` or `~/.qwen/skills/antitextai/SKILL.md` |
+| Crush | `.crush/skills/antitextai/SKILL.md` or `~/.config/crush/skills/antitextai/SKILL.md` |
+| Kilo Code | `.kilo/skills/antitextai/SKILL.md` or `~/.kilo/skills/antitextai/SKILL.md` |
+| Roo Code | `.roo/rules/antitextai.md`, or `~/.roo/rules/antitextai.md` |
+| goose | `.goosehints`, or `~/.config/goose/.goosehints` |
+| Warp | `WARP.md`, or `~/.agents/AGENTS.md` |
 
 Copy-paste-ready files for each of those live in [`integrations/`](integrations), and
 [`docs/agent-integration.md`](docs/agent-integration.md) explains the install and the
@@ -265,6 +272,8 @@ open("draft.md", "w", encoding="utf-8", newline="").write(cleaned)
 antitextai scan   PATHS... [--strict] [--json] [--ext .md] [--exclude GLOB] [--exclude-dir NAME]
 antitextai clean  PATHS... [--write] [--no-bom] [--quiet] [--json] [--ext .md] [--exclude GLOB]
 antitextai verify PATHS... [--strict] [--allow-dashes] [--show-clean] [--json]
+antitextai scan-fonts  PATHS... [--strict] [--json] [--ext .css]   # non-standard font-family
+antitextai scan-styles PATHS... [--strict] [--json]                 # AI-style prose patterns
 ```
 
 - `PATHS` accepts files or directories; `-` reads stdin and writes stdout (`clean` only).
@@ -317,11 +326,11 @@ fixtures) and let the rest fail the build.
 
 ```text
 antitextai/            the package: cleaner, scanner, verifier, CLI (no dependencies)
-tests/                 67 unittest cases, runnable with unittest or pytest
+tests/                 111 unittest cases, runnable with unittest or pytest
 SKILL.md               the Agent Skills compatible skill: full ruleset and workflow
 AGENTS.md              the same rules in the form AGENTS.md readers expect
 docs/                  agent integration, architecture, and the AI signature manual
-integrations/          ready-to-copy rule files for ten tools
+integrations/          ready-to-copy rule files for eighteen tools
 examples/              a dirty fixture and the exact output of cleaning it
 scripts/               install.sh, install.ps1, and the block merger they share
 .github/workflows/     CI: tests on three platforms, a self-scan, and a package install
