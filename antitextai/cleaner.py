@@ -17,7 +17,6 @@ SMART     = {0x201C: '"', 0x201D: '"', 0x2018: "'", 0x2019: "'", 0x2026: "...",
 
 BULLET_LEAD = re.compile(r"(?m)^([ \t]*)\u2022[ \t]*")
 
-# --- Conversational framing -----------------------------------------------------------------
 # Framing is stripped, not the line it sits on: "In today's market, revenue grew." must become
 # "Revenue grew.", not vanish. Deleting whole lines here once emptied files that had substance
 # appended after the opener.
@@ -61,7 +60,6 @@ NARRATION = re.compile(
     rf"(?im)^[ \t]*{CP}[ \t]*(?:now|then|first|next|finally|here)[ \t]*,[ \t]*(?:we|i)[ \t]+[^\n]*$\n?")
 STEPNARR  = re.compile(rf"(?im)^[ \t]*{CP}[ \t]*step[ \t]*\d+[ \t]*:?[^\n]*$\n?")
 SEPARATOR = re.compile(rf"(?m)^[ \t]*(?:{CP}|/\*)?[ \t]*[=\-*_]{{5,}}[ \t]*(?:\*/|//|#)?[ \t]*$\n?")
-# A trailing sign-off appended to a content line: "...is a solid choice. Hope this helps!".
 # Requires a sentence boundary, so `will let me know if the job fails` is never truncated.
 INLINE_OUTRO = re.compile(
     r"(?im)(?<=[.!?])[ \t]+(?:hope (?:this|that) helps|feedback welcome)[.!]?[ \t]*$"
@@ -82,7 +80,6 @@ def split_frontmatter(text: str):
     return (fm.group(1), text[fm.end():]) if fm else ("", text)
 
 def setext_lines(text: str) -> set:
-    """Line indices that are legitimate setext underlines rather than banner separators."""
     lines = text.split("\n")
     keep = set()
     for i, line in enumerate(lines):
@@ -90,7 +87,7 @@ def setext_lines(text: str) -> set:
             continue                                         # indented => code, not a heading
         prev = lines[i - 1] if i else ""
         if prev.strip() and not prev.startswith("    ") and prev.strip()[:1] not in "-=":
-            keep.add(i)                                      # text above, underline below
+            keep.add(i)
     return keep
 
 
@@ -102,17 +99,17 @@ def clean(text: str, *, strip_bom: bool = True) -> str:
     # ^-anchored rule (and let INVISIBLE delete it as an ordinary U+FEFF).
     keep_bom = not strip_bom and text.startswith("\ufeff")
     if strip_bom:
-        text = text.replace("\ufeff", "", 1)              # byte-0 BOM only; U+FEFF elsewhere stays
+        text = text.replace("\ufeff", "", 1)
     elif keep_bom:
         text = text[1:]
     crlf = "\r\n" in text and text.count("\r\n") >= text.count("\n") - text.count("\r\n")
     if "\r" in text:
         text = text.replace("\r\n", "\n").replace("\r", "\n")
 
-    head, body = split_frontmatter(text)                  # frontmatter never sees the line rules
+    head, body = split_frontmatter(text)
     body = INVISIBLE.sub("", body)
     body = BULLET_LEAD.sub(r"\1- ", body)
-    body = body.replace("\u2022", "-")                    # non-leading bullets, incl. "a• b"
+    body = body.replace("\u2022", "-")
     body = NBSP.sub(" ", body)
     body = body.translate(SMART)
     # Hold setext underlines out of the line rules; SEPARATOR would otherwise eat them silently.
@@ -134,7 +131,7 @@ def clean(text: str, *, strip_bom: bool = True) -> str:
         body = GESTURE_INLINE.sub(lambda m: m.group(1) + m.group(2).upper(), body)
     for _, pat in LINE_RULES:
         body = pat.sub("", body)
-    for token, line in masked.items():                    # put setext underlines back, verbatim
+    for token, line in masked.items():
         body = body.replace(token, line)
     body = re.sub(r"[ \t]+$", "", body, flags=re.M)
     body = re.sub(r"\n{3,}", "\n\n", body).strip()

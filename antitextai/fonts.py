@@ -11,7 +11,6 @@ from __future__ import annotations
 import re
 from typing import Iterable, Optional
 
-# Curated Google sans-serifs.
 GOOGLE_FONTS = frozenset({
     "roboto",
     "open sans",
@@ -32,9 +31,6 @@ SYSTEM_FONTS = frozenset({
 
 ALLOWED = GOOGLE_FONTS | SYSTEM_FONTS
 
-# Patterns
-
-# CSS font-family declarations, capturing the full value after the colon.
 # A missing trailing semicolon is tolerated, because the last declaration in a
 # block may omit it.
 _CSS_FONT_FAMILY = re.compile(
@@ -42,19 +38,16 @@ _CSS_FONT_FAMILY = re.compile(
     re.IGNORECASE,
 )
 
-# Google Fonts <link> tags, extracting the family name(s) from the URL.
 _GFONT_LINK = re.compile(
     r'<link[^>]+href=["\']([^"\']*(?:fonts\.googleapis\.com)[^"\']*)["\'][^>]*>',
     re.IGNORECASE,
 )
 
-# Inline style font-family, working inside style="..." attributes.
 _INLINE_FONT_FAMILY = re.compile(
     r'''style\s*=\s*["\']([^"\']*font-family\s*:\s*[^;"]+)["\']''',
     re.IGNORECASE,
 )
 
-# Generic fallback keywords that are NOT themselves fonts.
 _GENERIC = frozenset({
     "sans-serif", "serif", "monospace", "cursive", "fantasy",
     "system-ui", "ui-serif", "ui-sans-serif", "ui-monospace",
@@ -63,7 +56,6 @@ _GENERIC = frozenset({
 
 
 def _tokenize_family(value: str) -> list[str]:
-    """Split a font-family value into individual family names."""
     return [t.strip().strip("'\"").lower() for t in value.split(",") if t.strip()]
 
 
@@ -78,8 +70,6 @@ def _is_allowed(name: str) -> bool:
 
 
 def _recommend(family: str) -> str:
-    """Pick the closest allowed replacement for display."""
-    # Heuristic: pick based on keyword overlap.
     keywords = {
         "roboto": {"modern", "clean", "ui", "web", "android", "geometric", "sans"},
         "open sans": {"humanist", "friendly", "neutral", "versatile", "body", "serif-like"},
@@ -98,10 +88,7 @@ def _recommend(family: str) -> str:
     return best
 
 
-# Public API
-
 class FontFinding:
-    """One non-standard font-family occurrence."""
     __slots__ = ("path", "line", "col", "value", "offender", "recommendation")
 
     def __init__(
@@ -132,16 +119,11 @@ class FontFinding:
 
 
 def scan_text(path: str, text: str) -> list[FontFinding]:
-    """Scan a single file's text for non-standard font-family declarations.
-
-    Returns a list of findings; empty list means all fonts are allowed.
-    """
     findings: list[FontFinding] = []
     lines = text.split("\n")
     pos = 0
 
     for i, line in enumerate(lines, start=1):
-        # CSS declarations
         for m in _CSS_FONT_FAMILY.finditer(line):
             families = _tokenize_family(m.group(1))
             for family in families:
@@ -157,7 +139,6 @@ def scan_text(path: str, text: str) -> list[FontFinding]:
                         recommendation=_recommend(family),
                     ))
 
-        # Inline styles
         for m in _INLINE_FONT_FAMILY.finditer(line):
             inner = re.search(r"font-family\s*:\s*([^;]+)", m.group(1), re.IGNORECASE)
             if inner:
@@ -175,10 +156,9 @@ def scan_text(path: str, text: str) -> list[FontFinding]:
                             recommendation=_recommend(family),
                         ))
 
-        # Google Fonts links (may span multiple lines, but catch single-line for now)
+        # Multi-line link tags are missed; only single-line ones are caught.
         for m in _GFONT_LINK.finditer(line):
             url = m.group(1)
-            # Extract family names from URL: /family=Roboto:ital,wght...
             family_match = re.search(r"family=([^&:]+)", url)
             if family_match:
                 raw = family_match.group(1).replace("+", " ")
@@ -203,7 +183,6 @@ def scan_paths(
     exclude_dirs: Optional[Iterable[str]] = None,
     exclude_globs: Iterable[str] = (),
 ) -> list[dict]:
-    """Scan every text file under `paths` for non-standard fonts."""
     from .files import iter_text_files
 
     kwargs: dict = {"exclude_globs": exclude_globs}
@@ -226,7 +205,7 @@ def scan_paths(
 
 
 def format_report(reports: list[dict]) -> str:
-    """Plain-text report. Files with no findings are omitted."""
+    """Files with no findings are omitted."""
     out = []
     for r in reports:
         out.append(f"{r['path']}")

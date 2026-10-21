@@ -51,7 +51,6 @@ def is_probably_text(data: bytes) -> bool:
 
 
 def read_text(path: pathlib.Path) -> Optional[str]:
-    """Decoded text, or None when the file is binary or not valid UTF-8."""
     try:
         data = path.read_bytes()
     except OSError:
@@ -124,7 +123,6 @@ def iter_files(
 
 
 def iter_text_files(paths: Iterable[str], **kwargs) -> Iterator[tuple[pathlib.Path, str]]:
-    """Yield (path, text) for every readable text file under `paths`."""
     for f in iter_files(paths, **kwargs):
         text = read_text(f)
         if text is not None:
