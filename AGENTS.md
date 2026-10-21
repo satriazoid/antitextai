@@ -21,6 +21,9 @@ Rules that matter for every task in this repo:
 - Preserve line endings and YAML frontmatter byte for byte. Write files with `newline=""`.
 - Add a regression test to `tests/` for every behavior you change, then run
   `python -m unittest discover -s tests -t .`.
+- Clean code is part of the cleanup: names carry the meaning, comments answer why and
+  never what, and no function gets a narration docstring by default. Full rules: `SKILL.md`,
+  section "Clean code".
 - Keep `SKILL.md`, `README.md`, and `examples/demo_after.md` in agreement with the code in the
   same change, since the tests pin that example.
 
