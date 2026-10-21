@@ -199,6 +199,66 @@ frame never leaves a lowercase sentence start. Multi-word openers (`sure thing`,
 - **Emoji section markers** (a rocket or chart glyph on a heading): delete unless the document's own
   style needs them.
 
+## Clean code: let the code carry the meaning
+
+Cleaned text is only half the job. Code written or edited under this skill must read like a
+person wrote it and a person can maintain it. The test is simple: a reader who has never seen
+the file follows what happens, in order, without a comment narrating each step.
+
+### Names replace comments
+
+- A comment that says what the next line does is a failed name. Rename the function, variable,
+  or constant until the comment has nothing left to say, then delete the comment. A caption
+  above `retries += 1` that reads "increment the retry counter" is noise; a docstring on
+  `def add(a, b)` that says it adds two numbers is noise with better formatting.
+- No docstring or comment block per function by default. A short function with a clear name
+  needs no introduction. Write one only when the signature cannot carry a real contract:
+  units, valid ranges, what it raises, side effects, ownership, thread safety.
+- No banner or section-divider comments inside a file, no end-of-block markers, no step
+  narration, no commented-out code. Dead code belongs in git history, not in a comment block.
+- Keep a comment only when it answers why, not what: a business rule, an external constraint,
+  a workaround with its bug reference, an invariant the types cannot express, a warning about
+  a non-obvious order of operations. One or two lines. If a reader gets it from the code in
+  five seconds, delete it.
+
+### Shape of a function
+
+- One function, one job, one level of abstraction. If a blank line and a comment are needed to
+  mark a new phase inside a function, that phase is a second function waiting for a name.
+- Keep functions short enough to see whole on one screen. Long is a smell, not a sin: a flat
+  list of assignments or a long data table reads fine and must not be chopped into one-line
+  helpers that force the reader to jump around the file.
+- Prefer guard clauses and early returns over nested pyramids, so the main path reads top to
+  bottom and the unhappy paths leave early.
+- No clever one-liners, nested ternaries, or comprehension puzzles when a plain loop or two
+  plain statements say the same thing. Boring code is maintainable code.
+- Do not abstract on the second use. Wait for the third, and even then only when the copies
+  must change together. A wrong abstraction costs more than a small duplication.
+
+### Write it the way a person writes it
+
+1. Solve the problem in the plainest order first: read the input, validate it, do the work,
+   return the result. Refactor only after it works and the tests pass.
+2. Follow the file that is already there: its naming, its error handling, its layout. New
+   code must not look imported from another project or generated from a template.
+3. Leave small human variation in place. Uniform perfection is a tell in code too: every
+   function the same length, every docstring the same shape, every error message the same
+   template. Match the unevenness of the surrounding code.
+4. Change one thing at a time and keep the diff reviewable. A pass that renames, moves, and
+   rewrites at once cannot be reviewed, and code that cannot be reviewed cannot be maintained.
+5. Delete what your change made unused: imports, helpers, flags, and the comments that
+   described the old shape. An explanation of code that no longer exists is the fastest way
+   to mislead the next reader.
+
+### Maintenance check
+
+- Read each function name aloud. If the honest description of what it does needs the word
+  "and", the function does two jobs: split it.
+- Search your own diff for comments you added. For each one ask whether it says why or only
+  what. Delete the what ones, and rename until they have nothing left to explain.
+- Read the diff as the next maintainer, six months from now, with no memory of this change.
+  Everything they need is in the names, the order, and the tests, or the code is not done.
+
 ## Pitfalls
 
 1. **Deleting a frame's line destroys content.** `In today's market, revenue grew 12%.` must

@@ -1,18 +1,7 @@
 """antitextai: strip AI text and code tells from prose, Markdown, and source code.
 
-Library use:
-
     from antitextai import clean, assert_no_artifacts, scan_text
-
-    text = clean(open("draft.md", encoding="utf-8").read())
-    assert_no_artifacts(text)          # raises AssertionError with the residual
-    report = scan_text(text)           # inventory before/after a pass
-
-CLI use:
-
-    python -m antitextai scan .
-    python -m antitextai clean --write README.md
-    python -m antitextai verify .
+    assert_no_artifacts(clean(open("draft.md", encoding="utf-8").read()))
 """
 from .cleaner import assert_no_artifacts, clean, setext_lines, split_frontmatter
 from .fonts import format_report as format_font_report, scan_paths as scan_font_paths

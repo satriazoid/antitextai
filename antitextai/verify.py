@@ -1,6 +1,6 @@
-"""Proof pass: assert that a file now carries no AI tells.
+"""Proof pass.
 
-`assert_no_artifacts()` from clean.py is the single source of truth here, so the
+`assert_no_artifacts()` from cleaner.py is the single source of truth here, so the
 verifier and the cleaner can never disagree about what "clean" means. Run this on the
 output, never on the input.
 """

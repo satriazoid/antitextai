@@ -1,11 +1,4 @@
-"""Command line interface: scan, clean, verify.
-
-    python -m antitextai scan  docs/
-    python -m antitextai clean --write docs/
-    python -m antitextai verify .
-
-Exit codes: 0 success, 1 findings or a residual, 2 bad usage.
-"""
+"""Command line interface. Exit codes: 0 success, 1 findings or a residual, 2 bad usage."""
 from __future__ import annotations
 
 import argparse

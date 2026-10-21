@@ -199,7 +199,7 @@ def scan_paths(
 
 
 def format_report(reports: list[dict]) -> str:
-    """Plain-text table. Files with nothing to report collapse to one line."""
+    """Files with nothing to report collapse to one line."""
     out = []
     flagged = [r for r in reports if r["kinds"] or r["rule_hits"]]
     for r in flagged:
