@@ -65,6 +65,19 @@ Deliberately kept:
 | Comment-looking string literals | `x = "# end of loop"` and `url = 'http://x--y/z'` are covered by tests and survive byte-identical. |
 | Line endings | CRLF in, CRLF out. LF in, LF out. |
 
+## More than characters
+
+Two subcommands cover tells that are not characters. Both report and never rewrite; the
+fix is a judgment call, like an em dash.
+
+- `scan-fonts` flags `font-family` declarations outside the allowed set: Roboto, Open Sans,
+  Montserrat, Lato, Poppins, and the fonts that ship with an operating system. Generated
+  CSS reaches for decorative faces; a stylesheet a person maintains names fonts readers
+  already have, or one of the five above on purpose.
+- `scan-styles` flags AI-style prose patterns in text files: hedging stacks, transition
+  chains, fluff openers and sign-offs, bold-keyword list items, emoji headings, and empty
+  filler sections.
+
 ## Install
 
 Three ways, from lightest to most permanent.
@@ -322,6 +335,24 @@ fixtures) and let the rest fail the build.
    rule. A `--no-bom` run detaches the byte-0 BOM for the passes and re-attaches it at the end,
    so a deliberate BOM does not hide the first line from the rules.
 
+## Clean code
+
+The skill half of this repo also sets writing rules for code, in the Clean code section
+of `SKILL.md`. The short version:
+
+- Names carry the meaning. A comment that says what a line or a function does is a failed
+  name: rename until the comment has nothing left to say, then delete it.
+- No docstring or comment block per function by default. One earns its place only with a
+  contract the signature cannot state: units, ranges, raises, side effects, ownership.
+- Comments answer why, never what: a business rule, an external constraint, a workaround
+  with its bug reference, an invariant.
+- One function, one job, plain order over clever tricks, so the next reader can follow
+  the file top to bottom.
+
+This package follows its own rules. The comments left in it are the why kind: the frame
+bug that once emptied files, the walrus form that is a syntax error before Python 3.10,
+the Windows write that would rewrite every line ending. They stay on purpose.
+
 ## Repository layout
 
 ```text
@@ -341,7 +372,7 @@ scripts/               install.sh, install.ps1, and the block merger they share
 ```bash
 python -m unittest discover -s tests -t . -v     # full suite, no pytest needed
 python -m antitextai verify CONTRIBUTING.md CHANGELOG.md integrations \
-  antitextai/files.py antitextai/scan.py antitextai/verify.py antitextai/cli.py --strict
+  antitextai/files.py antitextai/scan.py antitextai/verify.py antitextai/cli.py --strict --allow-dashes
 ```
 
 Everything is stdlib. `tests/` holds the regression suite, and every assertion in it is a
@@ -353,7 +384,9 @@ The command above deliberately lists files rather than whole directories. `SKILL
 READMEs, `docs/ai-signatures-manual.md`, `antitextai/cleaner.py`, and `tests/` all quote the
 patterns the tool looks for, as the data they are: the same concession a linter makes for its
 own test suite. Everything else in this repository has to pass clean, and `tests/test_selfcheck.py`
-enforces exactly that.
+enforces exactly that. The `--allow-dashes` in the command is the same allowance the
+self-check makes: the integration files quote em and en dashes while explaining why
+they need review.
 
 Pull requests welcome. Run the suite and the self-scan before opening one; CI runs both on
 Linux, macOS, and Windows across Python 3.9 to 3.13.
@@ -363,6 +396,8 @@ Linux, macOS, and Windows across Python 3.9 to 3.13.
 `SKILL.md` follows the Agent Skills standard (`name` and `description` frontmatter in a
 `SKILL.md` inside a folder named after the skill), which is what Claude Code, opencode, and
 other readers of `.claude/skills/`, `.opencode/skills/`, and `.agents/skills/` expect.
+Muse (Meta) reads the same `SKILL.md` from its custom-skills folder; this skill is
+installed and in use there.
 Nothing in the package needs an agent to run: the CLI and the library stand alone.
 
 ## License
