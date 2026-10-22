@@ -18,14 +18,24 @@ from .files import iter_text_files
 
 # Characters clean() maps deterministically. Finding these means "run the cleaner".
 MAPPED_CODEPOINTS = frozenset(
-    {0x200B, 0x200C, 0x200D, 0x2060, 0xFEFF, 0x00AD, 0x200E, 0x200F,  # invisible / bidi
+    {0x200B, 0x200C, 0x200D, 0xFEFF, 0x00AD, 0x200E, 0x200F, 0x180E,  # invisible / bidi marks
      0x00A0, 0x202F,                                                  # space variants
      0x2022}                                                          # bullet
-) | frozenset(C.SMART)
+) | frozenset(C.SMART) | frozenset(
+    set(range(0x2000, 0x200B))       # unicode spaces
+    | set(range(0x202A, 0x202F))     # bidi embeddings and overrides
+    | set(range(0x2060, 0x2065))     # word joiner and invisible operators
+    | set(range(0x2066, 0x2070))     # bidi isolates and deprecated format chars
+    | set(range(0xFFF9, 0xFFFC))     # interlinear annotation anchors
+    | set(range(0xE0000, 0xE0080))   # tag characters (ASCII smuggling)
+    | {0x1680, 0x205F, 0x3000, 0x2028, 0x2029}
+)
 
 # Characters clean() deliberately leaves alone: a rule cannot decide between a numeric
 # range, a clause break, or a quotation. Every hit needs a human read.
-REVIEW_CODEPOINTS = frozenset({0x2013, 0x2014})
+REVIEW_CODEPOINTS = (frozenset({0x2013, 0x2014, 0x2015})
+                     | frozenset(range(0xFE00, 0xFE10))
+                     | frozenset(range(0xE0100, 0xE01F0)))
 
 # Decorative glyph families that read as generated formatting. Report-only: some are
 # legitimate (a real tree diagram, a checked checklist), so the scan flags, never fixes.
@@ -58,6 +68,8 @@ KEEP_RANGES = (
 RULE_GROUPS = (
     ("INVISIBLE", C.INVISIBLE),
     ("NBSP", C.NBSP),
+    ("LINE_SEP", C.LINE_SEP),
+    ("VARSEL", C.VARSEL),
     ("BULLET", C.BULLET_LEAD),
     ("BARE_FLUFF", C.BARE_FLUFF),
     ("SALUTATION", C.SALUTATION),
