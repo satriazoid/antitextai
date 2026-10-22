@@ -23,6 +23,8 @@ CLEAN_FILES = [
     "antitextai/cli.py",
     "antitextai/fonts.py",
     "antitextai/styles.py",
+    "antitextai/comments.py",
+    "antitextai/word.py",
     "AGENTS.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",

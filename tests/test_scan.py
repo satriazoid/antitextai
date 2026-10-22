@@ -140,3 +140,14 @@ class FileWalkingTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+class NewClassificationTest(unittest.TestCase):
+    def test_new_characters_classified(self):
+        text = ("thin\u2009space\nideo\u3000graphic\nline\u2028sep\n"
+                "operator\u2063here\nbidi\u202ehere\ntag\U000E0041here\n"
+                "bar\u2015here\nsel\ufe0fhere\nselx\U000E0100here\n")
+        got = {(c["codepoint"], c["category"]) for c in char_report(text)}
+        for cp in ("U+2009", "U+3000", "U+2028", "U+2063", "U+202E", "U+E0041"):
+            self.assertIn((cp, "mapped"), got)
+        for cp in ("U+2015", "U+FE0F", "U+E0100"):
+            self.assertIn((cp, "review"), got)

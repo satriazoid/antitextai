@@ -12,6 +12,8 @@ from . import cleaner as C
 from .files import DEFAULT_EXCLUDE_DIRS, DEFAULT_EXTENSIONS, read_text, write_text
 from .fonts import format_report as format_font_report, scan_paths as scan_font_paths
 from .styles import format_report as format_style_report, scan_paths as scan_style_paths
+from .comments import CODE_EXTENSIONS as COMMENT_EXTS, format_report as format_comment_report, scan_paths as scan_comment_paths, scrub_text
+from .word import format_report as format_word_report, scan_paths as scan_word_paths
 from .scan import format_report as format_scan, scan_paths
 from .verify import format_report as format_verify, verify_paths
 
@@ -28,6 +30,7 @@ examples:
     python -m antitextai scan-fonts . --json > fonts.json   # machine-readable report
 
 scan reports AI tells; scan-fonts reports non-standard font-family declarations; clean rewrites; verify proves.
+scan-comments reports comment spam in code; clean-comments removes long comment blocks; scan-word reports tells inside .docx files.
 """
 
 
@@ -121,6 +124,63 @@ def _expand(args: argparse.Namespace) -> list[pathlib.Path]:
     return iter_files(args.paths, **_kwargs(args))
 
 
+
+def _cmd_scan_comments(args: argparse.Namespace) -> int:
+    reports = scan_comment_paths(args.paths, **_kwargs(args))
+    if args.json:
+        print(json.dumps(reports, indent=2))
+    else:
+        print(format_comment_report(reports))
+    if args.strict and reports:
+        return 1
+    return 0
+
+
+def _cmd_scan_word(args: argparse.Namespace) -> int:
+    reports = scan_word_paths(args.paths, **_kwargs(args))
+    if args.json:
+        print(json.dumps(reports, indent=2))
+    else:
+        print(format_word_report(reports))
+    flagged = [r for r in reports if r["count"] > 0]
+    if args.strict and flagged:
+        return 1
+    return 0
+
+
+def _cmd_clean_comments(args: argparse.Namespace) -> int:
+    if args.paths == ["-"]:
+        print("clean-comments needs file names: the comment syntax comes from the extension",
+              file=sys.stderr)
+        return 2
+    from .files import iter_files
+
+    kwargs: dict = {"extensions": frozenset(args.ext) if args.ext else COMMENT_EXTS,
+                    "exclude_globs": args.exclude}
+    if args.exclude_dir:
+        kwargs["exclude_dirs"] = args.exclude_dir
+    changed = 0
+    cleaned = 0
+    for f in iter_files(args.paths, **kwargs):
+        text = read_text(f)
+        if text is None:
+            print(f"skip    {f} (binary or not UTF-8)", file=sys.stderr)
+            continue
+        out = scrub_text(str(f), text, min_block=args.min_block)
+        cleaned += 1
+        if args.write:
+            if out != text:
+                write_text(f, out)
+                changed += 1
+                if not args.quiet:
+                    print(f"cleaned {f}", file=sys.stderr)
+        else:
+            sys.stdout.write(out)
+    if args.write and not args.quiet:
+        print(f"{changed} file(s) rewritten, {cleaned} cleaned", file=sys.stderr)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="antitextai",
@@ -169,6 +229,31 @@ def build_parser() -> argparse.ArgumentParser:
     _common(p_styles)
     p_styles.add_argument("--strict", action="store_true", help="exit 1 when any AI-style tell is found")
     p_styles.set_defaults(func=_cmd_scan_styles)
+
+    p_comments = sub.add_parser("scan-comments", help="report comment spam in code files",
+                                description="Report the comment-to-code ratio, long comment "
+                                            "blocks, and docstring spam per code file.")
+    _common(p_comments)
+    p_comments.add_argument("--strict", action="store_true", help="exit 1 when any spam was found")
+    p_comments.set_defaults(func=_cmd_scan_comments)
+
+    p_scrub = sub.add_parser("clean-comments", help="remove long comment blocks from code files",
+                             description="Remove comment blocks of --min-block lines or more. "
+                                         "Blocks with a license, a tool directive, or a TODO/FIXME "
+                                         "marker are kept, and docstrings are never touched.")
+    _common(p_scrub)
+    p_scrub.add_argument("--write", action="store_true", help="rewrite files in place")
+    p_scrub.add_argument("--quiet", action="store_true", help="no per-file progress on stderr")
+    p_scrub.add_argument("--min-block", type=int, default=4, metavar="N",
+                         help="smallest comment block to remove (default: 4)")
+    p_scrub.set_defaults(func=_cmd_clean_comments)
+
+    p_word = sub.add_parser("scan-word", help="report AI tells inside .docx files",
+                            description="Extract the text of Word documents and report the "
+                                        "tells in it. Report-only: nothing is rewritten.")
+    _common(p_word)
+    p_word.add_argument("--strict", action="store_true", help="exit 1 when any tell was found")
+    p_word.set_defaults(func=_cmd_scan_word)
 
     return ap
 

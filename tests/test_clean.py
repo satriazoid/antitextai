@@ -188,3 +188,62 @@ class CodeAndStructureTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class NewCharactersTest(unittest.TestCase):
+    def test_all_unicode_spaces_become_plain(self):
+        for cp in (0x00A0, 0x1680, *range(0x2000, 0x200B), 0x202F, 0x205F, 0x3000):
+            with self.subTest(cp=hex(cp)):
+                self.assertEqual(clean(f"a{chr(cp)}b"), "a b\n")
+
+    def test_invisible_operators_removed(self):
+        for cp in (0x2061, 0x2062, 0x2063, 0x2064):
+            with self.subTest(cp=hex(cp)):
+                self.assertEqual(clean(f"a{chr(cp)}b"), "ab\n")
+
+    def test_bidi_controls_removed(self):
+        for cp in (0x202A, 0x202C, 0x202E, 0x2066, 0x2069, 0x206A, 0x206F):
+            with self.subTest(cp=hex(cp)):
+                self.assertEqual(clean(f"a{chr(cp)}b"), "ab\n")
+
+    def test_tag_characters_removed(self):
+        self.assertEqual(clean("a\U000E0041\U000E0001b\U000E007F"), "ab\n")
+
+    def test_annotation_anchors_removed(self):
+        for cp in (0x180E, 0xFFF9, 0xFFFA, 0xFFFB):
+            with self.subTest(cp=hex(cp)):
+                self.assertEqual(clean(f"a{chr(cp)}b"), "ab\n")
+
+    def test_line_separators_become_newlines(self):
+        self.assertEqual(clean("a\u2028b"), "a\nb\n")
+        self.assertEqual(clean("a\u2029b"), "a\nb\n")
+
+    def test_hyphens_and_dot_leaders_mapped(self):
+        self.assertEqual(clean("a\u2010b"), "a-b\n")
+        self.assertEqual(clean("a\u2011b"), "a-b\n")
+        self.assertEqual(clean("a\u2024b"), "a.b\n")
+        self.assertEqual(clean("a\u2025b"), "a..b\n")
+
+    def test_horizontal_bar_is_review_only(self):
+        self.assertEqual(clean("a\u2015b"), "a\u2015b\n")
+
+    def test_variation_selector_after_ascii_removed(self):
+        self.assertEqual(clean("a\ufe0f"), "a\n")
+
+    def test_variation_selector_run_removed(self):
+        self.assertEqual(clean("\u2764\ufe00\ufe01"), "\u2764\n")
+
+    def test_single_selector_after_emoji_kept(self):
+        self.assertEqual(clean("\u2764\ufe0f"), "\u2764\ufe0f\n")
+
+    def test_assert_rejects_new_residuals(self):
+        with self.assertRaises(AssertionError):
+            assert_no_artifacts("a\U000E0041b")
+        with self.assertRaises(AssertionError):
+            assert_no_artifacts("a\u2063b")
+        with self.assertRaises(AssertionError):
+            assert_no_artifacts("a\u2009b")
+
+    def test_clean_idempotent_with_new_chars(self):
+        dirty = "a\u2009b\U000E0041 c\u2028d\u2011e"
+        self.assertEqual(clean(clean(dirty)), clean(dirty))

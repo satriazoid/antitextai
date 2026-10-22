@@ -10,10 +10,18 @@ import unicodedata
 # That anchoring is what keeps `x = "# end of loop"` out of the end-marker rule.
 CP = r"(?://|#|--|\*)"
 
-INVISIBLE = re.compile(r"[\u200B\u200C\u200D\u2060\uFEFF\u00AD\u200E\u200F]")
-NBSP      = re.compile(r"[\u00A0\u202F]")
+INVISIBLE = re.compile(r"[\u200B\u200C\u200D\u2060-\u2064\u202A-\u202E\u2066-\u206F"
+                       r"\uFEFF\u00AD\u200E\u200F\u180E\uFFF9-\uFFFB\U000E0000-\U000E007F]")
+NBSP      = re.compile(r"[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]")
+LINE_SEP  = re.compile(r"[\u2028\u2029]")
+# A lone selector after a non-ASCII char is presentation data (the emoji VS16, a CJK
+# ideographic variation sequence). Selectors glued to ASCII or stacked in runs carry
+# hidden bytes instead, so only those two shapes are removed.
+VARSEL    = re.compile(r"(?<=[\x00-\x7F])[\uFE00-\uFE0F\U000E0100-\U000E01EF]"
+                       r"|[\uFE00-\uFE0F\U000E0100-\U000E01EF]{2,}")
 SMART     = {0x201C: '"', 0x201D: '"', 0x2018: "'", 0x2019: "'", 0x2026: "...",
-             0x2032: "'", 0x2033: '"', 0x00D7: "x", 0x2212: "-"}
+             0x2032: "'", 0x2033: '"', 0x00D7: "x", 0x2212: "-",
+             0x2010: "-", 0x2011: "-", 0x2024: ".", 0x2025: ".."}
 
 BULLET_LEAD = re.compile(r"(?m)^([ \t]*)\u2022[ \t]*")
 
@@ -69,7 +77,8 @@ INLINE_OUTRO = re.compile(
 SETEXT = re.compile(r"^([=-])\1+[ \t]*$")
 FRONTMATTER = re.compile(r"\A(---[ \t]*\r?\n.*?\r?\n---[ \t]*\r?\n)", re.S)
 
-CHAR_RULES = (("INVISIBLE", INVISIBLE), ("NBSP", NBSP), ("BULLET", BULLET_LEAD))
+CHAR_RULES = (("INVISIBLE", INVISIBLE), ("NBSP", NBSP), ("LINE_SEP", LINE_SEP),
+              ("VARSEL", VARSEL), ("BULLET", BULLET_LEAD))
 LINE_RULES = (("BARE_FLUFF", BARE_FLUFF), ("SALUTATION", SALUTATION), ("INLINE_OUTRO", INLINE_OUTRO),
               ("PRECODE", PRECODE), ("END_WHOLE", END_WHOLE), ("END_TRAIL", END_TRAIL),
               ("NARRATION", NARRATION), ("STEPNARR", STEPNARR), ("SEPARATOR", SEPARATOR))
@@ -108,9 +117,11 @@ def clean(text: str, *, strip_bom: bool = True) -> str:
 
     head, body = split_frontmatter(text)
     body = INVISIBLE.sub("", body)
+    body = VARSEL.sub("", body)
     body = BULLET_LEAD.sub(r"\1- ", body)
     body = body.replace("\u2022", "-")
     body = NBSP.sub(" ", body)
+    body = LINE_SEP.sub("\n", body)
     body = body.translate(SMART)
     # Hold setext underlines out of the line rules; SEPARATOR would otherwise eat them silently.
     masked = {}
@@ -148,7 +159,8 @@ def assert_no_artifacts(text: str) -> None:
     keep = setext_lines(body)                             # these look like SEPARATOR, but are headings
     lines = body.split("\n")
     masked = "\n".join("" if i in keep else line for i, line in enumerate(lines))
-    for name, pat in (("INVISIBLE", INVISIBLE), ("NBSP", NBSP), ("BULLET", BULLET_LEAD),
+    for name, pat in (("INVISIBLE", INVISIBLE), ("NBSP", NBSP), ("LINE_SEP", LINE_SEP),
+                      ("VARSEL", VARSEL), ("BULLET", BULLET_LEAD),
                       ("INTERJECT", INTERJECT), ("CLAUSE", CLAUSE), ("SUBORDINATE", SUBORDINATE),
                       ("GESTURE_INLINE", GESTURE_INLINE)) + LINE_RULES:
         if (m := pat.search(masked)):
