@@ -7,6 +7,21 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Character coverage for the current generation of AI artifacts: invisible operators
+  (U+2061-U+2064), bidi embeddings, overrides and isolates (U+202A-U+202E,
+  U+2066-U+206F), Unicode tag characters (U+E0000-U+E007F), interlinear annotation
+  anchors, all wide and non-breaking spaces (U+2000-U+200A, U+205F, U+3000, U+1680),
+  line and paragraph separators, Unicode hyphens and dot leaders; the horizontal bar
+  U+2015 and variation selectors are classified for review, with selectors on ASCII
+  or in runs removed automatically.
+- `scan-word` spacing findings: wide spaces in the text, full justification that
+  stretches them, and expanded character spacing in the XML.
+- `scan-comments` and `clean-comments` subcommands: measure comment spam in code files
+  (comment-to-code ratio, long blocks, long lines, docstring spam) and scrub comment
+  blocks of 4 or more lines, keeping license headers, tool directives, task markers,
+  and all docstrings.
+- `scan-word` subcommand: extract text from `.docx` files with the standard library
+  and report AI tells inside Word documents (report-only).
 - Agent integrations for Qwen Code, Crush, Kilo Code, Roo Code, goose, and Warp, bringing
   the supported tools to eighteen, with per-tool files under `integrations/`.
 - `scripts/install.sh` and `scripts/install.ps1` now accept `--target all` / `-Target all`

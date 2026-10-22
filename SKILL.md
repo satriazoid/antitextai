@@ -119,19 +119,27 @@ assert_no_artifacts(clean(open("draft.md", encoding="utf-8").read()))
 
 | Character | Codepoint | Becomes |
 | --- | --- | --- |
-| Zero-width space / non-joiner / joiner / word joiner | `U+200B` `U+200C` `U+200D` `U+2060` | deleted |
+| Zero-width space / non-joiner / joiner, word joiner, invisible operators | `U+200B` `U+200C` `U+200D` `U+2060`-`U+2064` | deleted |
+| Bidi embeddings, overrides, isolates, deprecated format controls | `U+202A`-`U+202E` `U+2066`-`U+206F` | deleted |
+| Tag characters (a hidden copy of ASCII, used to smuggle instructions) | `U+E0000`-`U+E007F` | deleted |
+| Interlinear annotation anchors, Mongolian vowel separator | `U+FFF9`-`U+FFFB` `U+180E` | deleted |
 | BOM at byte 0 | `U+FEFF` | deleted (a mid-file `U+FEFF` goes with the class below) |
 | Soft hyphen, LRM, RLM | `U+00AD` `U+200E` `U+200F` | deleted |
-| Non-breaking / narrow space | `U+00A0` `U+202F` | space |
+| Wide and non-breaking spaces | `U+00A0` `U+1680` `U+2000`-`U+200A` `U+202F` `U+205F` `U+3000` | space |
+| Line / paragraph separator | `U+2028` `U+2029` | newline |
 | Smart quotes, primes | `U+201C` `U+201D` `U+2018` `U+2019` `U+2032` `U+2033` | `"` and `'` |
 | Ellipsis token | `U+2026` | `...` |
 | Multiplication sign, minus sign | `U+00D7` `U+2212` | `x`, `-` |
+| Hyphens, dot leaders | `U+2010` `U+2011` `U+2024` `U+2025` | `-`, `.`, `..` |
+| Variation selectors glued to ASCII, or stacked in runs of 2+ | `U+FE00`-`U+FE0F` `U+E0100`-`U+E01EF` | deleted |
 | Bullet | `U+2022` | `-` (`- ` at line start) |
 
 ### Characters: reported, never replaced
 
 | Character | Why it needs you |
 | --- | --- |
+| Horizontal bar `U+2015` | A dash variant that joins clauses like an em dash. Same review as the dashes below. |
+| Variation selectors | A single selector after a non-ASCII character is presentation data (an emoji presentation selector, a CJK variation sequence) and `clean` keeps it; selectors attached to ASCII or stacked in runs are mapped, because there they carry hidden bytes. |
 | Em dash `U+2014`, en dash `U+2013` | A dash can join a numeric range (`2019–2021`), a compound noun, a quotation, or a clause. Each has a different correct replacement, so every occurrence goes through review. Prefer splitting the sentence or a comma over a blind `-`, which is its own tic. |
 | Box drawing `U+2500`-`U+257F`, arrows `U+2190`-`U+21FF`, dingbats `U+2600`-`U+27BF`, emoji `U+1F300`-`U+1FAFF` | Reported as `decorative`. Delete decorative banners and status glyphs on headings, but a real tree diagram or a checked checklist stays. |
 | Anything classified `unclassified` | Look at it before deciding. Real content is classified `keep`. |
@@ -258,6 +266,62 @@ the file follows what happens, in order, without a comment narrating each step.
   what. Delete the what ones, and rename until they have nothing left to explain.
 - Read the diff as the next maintainer, six months from now, with no memory of this change.
   Everything they need is in the names, the order, and the tests, or the code is not done.
+
+## Comment spam in code
+
+The line rules catch narration they can recognize. They cannot judge bulk: a
+forty-line comment wall over a ten-line function, or a file that is mostly
+comments. That shape has its own pair of subcommands.
+
+```bash
+python -m antitextai scan-comments src/            # measure it, change nothing
+python -m antitextai clean-comments src/ --write   # remove long comment blocks
+```
+
+- `scan-comments` reports, per code file: the comment-to-code ratio
+  (`COMMENT_HEAVY` when comments and docstrings are at least half of the
+  non-blank lines), every comment block of 5 or more lines
+  (`LONG_COMMENT_BLOCK`), single comment lines over 160 characters
+  (`LONG_COMMENT_LINE`), and docstrings of 8 or more lines on functions and
+  classes (`DOCSTRING_SPAM`; a module docstring gets 16 lines of room,
+  because in this ruleset it carries the module rationale).
+- `clean-comments` removes comment blocks of 4 or more lines (`--min-block N`
+  to change it). That covers prose walls and commented-out code alike; both
+  belong in a docs file or in git history, not above the function.
+- Never removed: a block carrying a license or copyright header, a tool
+  directive (`noqa`, `type: ignore`, `eslint`, a shebang, a coding line), or
+  a TODO/FIXME marker, and every docstring. Docstrings are reported, not cut:
+  one can hold a contract the signature cannot state, so stripping them stays
+  judgment work (see the Clean code section).
+- Trailing comments on code lines are never touched by the scrub. Short blocks
+  of 3 lines or fewer stay when they stand on their own; unmarked lines inside a
+  block that is mostly removed go with it, so a note glued to a spam wall needs
+  a blank line or a marker to survive.
+
+## Word documents (.docx)
+
+A .docx is a zip of XML, so the walkers used to skip it as binary while
+AI-written prose sat inside untouched. `scan-word` extracts the text from
+`word/document.xml` with the standard library and reports the usual tells in
+it: mapped and review characters, frame and line rule hits, and the
+`scan-styles` prose patterns, located by paragraph.
+
+```bash
+python -m antitextai scan-word .                   # inventory .docx files
+python -m antitextai scan-word report.docx --strict
+```
+
+Report-only, on purpose: rewriting a .docx means owning its formatting.
+The workflow is scan here, export or copy the text out, clean it as plain
+text with the normal procedure, and paste it back.
+
+Spacing gets its own findings, because pasted AI text often spreads out in
+Word with gaps that are not in the words: `WIDE_SPACES` counts the wide
+and non-breaking spaces in the text (cleaning the exported text turns
+them into plain spaces), `WORD_JUSTIFY` fires when full justification
+meets those spaces (justification stretches them into the visible gaps),
+and `WORD_CHAR_SPACING` reports runs whose character spacing is expanded
+in the XML, which makes text look stretched letter by letter.
 
 ## Pitfalls
 

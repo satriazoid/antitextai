@@ -37,8 +37,13 @@ flags those and refuses to guess.
 
 | Removed or normalized | Becomes |
 | --- | --- |
-| `U+200B/200C/200D/2060/FEFF/00AD/200E/200F` (zero width, BOM mid-file, soft hyphen, bidi marks) | deleted |
-| `U+00A0`, `U+202F` (non-breaking and narrow spaces) | plain space |
+| `U+200B/200C/200D/2060-2064/FEFF/00AD/200E/200F` (zero width, invisible operators, BOM mid-file, soft hyphen, bidi marks) | deleted |
+| `U+202A-202E/2066-206F` (bidi embeddings, overrides, isolates) | deleted |
+| `U+E0000-E007F` (tag characters, a hidden copy of ASCII) | deleted |
+| `U+FFF9-FFFB`, `U+180E`, variation selectors on ASCII or in runs | deleted |
+| `U+00A0`, `U+1680`, `U+2000-200A`, `U+202F`, `U+205F`, `U+3000` (wide and non-breaking spaces) | plain space |
+| `U+2028`, `U+2029` (line and paragraph separators) | newline |
+| `U+2010`, `U+2011` (hyphens), `U+2024`, `U+2025` (dot leaders) | `-`, `.`, `..` |
 | `U+201C/201D/2018/2019`, `U+2032/2033` (smart quotes, primes) | `"` and `'` |
 | `U+2026` (ellipsis token) | `...` |
 | `U+00D7`, `U+2212` in prose and comments | `x`, `-` |
@@ -77,6 +82,13 @@ fix is a judgment call, like an em dash.
 - `scan-styles` flags AI-style prose patterns in text files: hedging stacks, transition
   chains, fluff openers and sign-offs, bold-keyword list items, emoji headings, and empty
   filler sections.
+- `scan-comments` reports comment spam in code files (comment-to-code ratio, long comment
+  blocks, docstring spam), and `clean-comments` removes comment blocks of 4 or more lines.
+  License headers, tool directives, TODO/FIXME markers, and docstrings are never removed.
+- `scan-word` extracts the text inside `.docx` files and reports the tells in Word
+  documents, located by paragraph, plus spacing findings (wide spaces, full
+  justification stretching them, expanded character spacing). Report-only: the
+  fix happens on exported text.
 
 ## Install
 
@@ -287,6 +299,9 @@ antitextai clean  PATHS... [--write] [--no-bom] [--quiet] [--json] [--ext .md] [
 antitextai verify PATHS... [--strict] [--allow-dashes] [--show-clean] [--json]
 antitextai scan-fonts  PATHS... [--strict] [--json] [--ext .css]   # non-standard font-family
 antitextai scan-styles PATHS... [--strict] [--json]                 # AI-style prose patterns
+antitextai scan-comments PATHS... [--strict] [--json]              # comment spam in code files
+antitextai clean-comments PATHS... [--write] [--min-block N]       # remove long comment blocks
+antitextai scan-word    PATHS... [--strict] [--json]               # AI tells inside .docx files
 ```
 
 - `PATHS` accepts files or directories; `-` reads stdin and writes stdout (`clean` only).
@@ -357,7 +372,7 @@ the Windows write that would rewrite every line ending. They stay on purpose.
 
 ```text
 antitextai/            the package: cleaner, scanner, verifier, CLI (no dependencies)
-tests/                 111 unittest cases, runnable with unittest or pytest
+tests/                 150 unittest cases, runnable with unittest or pytest
 SKILL.md               the Agent Skills compatible skill: full ruleset and workflow
 AGENTS.md              the same rules in the form AGENTS.md readers expect
 docs/                  agent integration, architecture, and the AI signature manual
